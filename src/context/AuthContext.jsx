@@ -64,6 +64,18 @@ export function AuthProvider({ children }) {
     return { user, tenants };
   };
 
+  const updateProfile = async (data) => {
+  const res = await api.patch("/users/me", data);
+      const updatedUser = res.data;
+
+      // Update local state + localStorage
+      const newUser = { ...user, ...updatedUser };
+      setUser(newUser);
+      localStorage.setItem("user", JSON.stringify(newUser));
+
+      return updatedUser;
+    };
+
   // Signup
   const signup = async (tenantName, mobile) => {
     const res = await api.post("/auth/signup", { tenantName, mobile });
@@ -109,6 +121,7 @@ export function AuthProvider({ children }) {
         selectTenant,
         logout,
         loading,
+        updateProfile
       }}
     >
       {children}

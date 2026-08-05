@@ -7,6 +7,7 @@ import Signup from "./pages/Signup";
 import SelectTenant from "./pages/SelectTenant";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
+import { ToastProvider } from "./context/ToastContext";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -15,10 +16,25 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="/login" element={!user ? <Login /> : <Navigate to="/dashboard" />} />
-      <Route path="/signup" element={!user ? <Signup /> : <Navigate to="/dashboard" />} />
-      <Route path="/select-tenant" element={user ? <SelectTenant /> : <Navigate to="/login" />} />
+      {/* Public routes */}
+      <Route
+        path="/login"
+        element={!user ? <Login /> : <Navigate to="/dashboard" replace />}
+      />
+      <Route
+        path="/signup"
+        element={!user ? <Signup /> : <Navigate to="/dashboard" replace />}
+      />
 
+      {/* Select tenant */}
+      <Route
+        path="/select-tenant"
+        element={
+          user ? <SelectTenant /> : <Navigate to="/login" replace />
+        }
+      />
+
+      {/* Protected routes */}
       <Route
         path="/dashboard"
         element={
@@ -30,10 +46,11 @@ function AppRoutes() {
         }
       />
 
+      {/* Only Owner can access Users */}
       <Route
         path="/users"
         element={
-          <ProtectedRoute>
+          <ProtectedRoute roles={["owner"]}>
             <Layout>
               <Users />
             </Layout>
@@ -41,7 +58,17 @@ function AppRoutes() {
         }
       />
 
-      <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} />} />
+      {/* Catch-all / Invalid routes */}
+      <Route
+        path="*"
+        element={
+          user ? (
+            <Navigate to="/dashboard" replace />
+          ) : (
+            <Navigate to="/login" replace />
+          )
+        }
+      />
     </Routes>
   );
 }
@@ -49,9 +76,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <ToastProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </ToastProvider>
     </AuthProvider>
   );
 }

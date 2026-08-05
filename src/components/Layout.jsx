@@ -19,15 +19,21 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
+import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuth } from "../context/AuthContext";
+import BusinessSwitcher from "./BusinessSwitcher";
+import IconWithTooltip from "./IconWithTooltip";
+import usePermission from "../hooks/usePermission";
 
 const drawerWidth = 240;
 
 export default function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [switcherOpen, setSwitcherOpen] = useState(false);  
   const { currentTenant, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const { canManageUsers } = usePermission();
 
   const handleDrawerToggle = () => {
     setMobileOpen(!mobileOpen);
@@ -40,7 +46,9 @@ export default function Layout({ children }) {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
-    { text: "Users", icon: <PeopleIcon />, path: "/users" },
+    ...(canManageUsers
+      ? [{ text: "Users", icon: <PeopleIcon />, path: "/users" }]
+      : []),
   ];
 
   const drawer = (
@@ -102,6 +110,17 @@ export default function Layout({ children }) {
           <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
             {currentTenant?.name || "Dashboard"}
           </Typography>
+          <Box
+            sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
+            onClick={() => setSwitcherOpen(true)}
+          >
+            <IconWithTooltip
+            icon={AccountCircleIcon}
+            tooltip="User Profile"
+            style={{ fontSize: 40, cursor: "pointer" }}/>
+          </Box>
+
+          {/* You can also add a small icon button here */}
         </Toolbar>
       </AppBar>
 
@@ -147,6 +166,12 @@ export default function Layout({ children }) {
       >
         {children}
       </Box>
+
+      {/* Bottom Sheet */}
+      <BusinessSwitcher
+        open={switcherOpen}
+        onClose={() => setSwitcherOpen(false)}
+      />
     </Box>
   );
 }
