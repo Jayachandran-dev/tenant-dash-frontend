@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import BusinessIcon from "@mui/icons-material/Business";
 import {
   Box,
   Drawer,
@@ -51,11 +52,11 @@ export default function Layout({ children }) {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+    { text: "Business Profile", icon: <BusinessIcon />, path: "/business-profile" },
     ...(canManageUsers
       ? [{ text: "Users", icon: <PeopleIcon />, path: "/users" }]
       : []),
   ];
-
   // ========== DRAWER CONTENT ==========
   const drawer = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>

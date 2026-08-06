@@ -8,6 +8,7 @@ import SelectTenant from "./pages/SelectTenant";
 import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import { ToastProvider } from "./context/ToastContext";
+import BusinessProfile from "./pages/BusinessProfile";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -67,6 +68,17 @@ function AppRoutes() {
           ) : (
             <Navigate to="/login" replace />
           )
+        }
+      />
+
+      <Route
+        path="/business-profile"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <BusinessProfile />
+            </Layout>
+          </ProtectedRoute>
         }
       />
     </Routes>
