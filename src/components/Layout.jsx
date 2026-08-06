@@ -13,31 +13,36 @@ import {
   ListItemButton,
   ListItemIcon,
   ListItemText,
-  Button,
+  Avatar,
+  Stack,
+  BottomNavigation,
+  BottomNavigationAction,
+  Paper,
+  useMediaQuery,
+  useTheme,
 } from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
-import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import { useAuth } from "../context/AuthContext";
 import BusinessSwitcher from "./BusinessSwitcher";
-import IconWithTooltip from "./IconWithTooltip";
 import usePermission from "../hooks/usePermission";
 
-const drawerWidth = 240;
+const drawerWidth = 260;
 
 export default function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
-  const [switcherOpen, setSwitcherOpen] = useState(false);  
-  const { currentTenant, logout } = useAuth();
+  const [switcherOpen, setSwitcherOpen] = useState(false);
+
+  const { user, currentTenant, logout } = useAuth();
+  const { canManageUsers } = usePermission();
   const navigate = useNavigate();
   const location = useLocation();
-  const { canManageUsers } = usePermission();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
+  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
 
   const handleLogout = () => {
     logout();
@@ -51,15 +56,41 @@ export default function Layout({ children }) {
       : []),
   ];
 
+  // ========== DRAWER CONTENT ==========
   const drawer = (
-    <div>
-      <Toolbar>
-        <Typography variant="h6" noWrap>
-          {currentTenant?.name || "Business"}
-        </Typography>
-      </Toolbar>
+    <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
+      {/* User + Business Header (Clickable) */}
+      <Box
+        onClick={() => setSwitcherOpen(true)}
+        sx={{
+          p: 2.5,
+          cursor: "pointer",
+          "&:hover": { bgcolor: "action.hover" },
+        }}
+      >
+        <Stack direction="row" spacing={1.5} alignItems="center">
+          <Avatar
+            src={user?.avatar || undefined}
+            sx={{ width: 48, height: 48 }}
+          >
+            {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+          </Avatar>
+
+          <Box sx={{ overflow: "hidden" }}>
+            <Typography fontWeight={600} noWrap>
+              {user?.name || "User"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {currentTenant?.name || "Select Business"}
+            </Typography>
+          </Box>
+        </Stack>
+      </Box>
+
       <Divider />
-      <List>
+
+      {/* Navigation Links */}
+      <List sx={{ flexGrow: 1 }}>
         {menuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
@@ -75,7 +106,10 @@ export default function Layout({ children }) {
           </ListItem>
         ))}
       </List>
+
       <Divider />
+
+      {/* Logout */}
       <List>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
@@ -86,11 +120,17 @@ export default function Layout({ children }) {
           </ListItemButton>
         </ListItem>
       </List>
-    </div>
+    </Box>
+  );
+
+  // ========== BOTTOM NAV (Mobile / PWA) ==========
+  const bottomNavValue = menuItems.findIndex(
+    (item) => item.path === location.pathname
   );
 
   return (
-    <Box sx={{ display: "flex" }}>
+    <Box sx={{ display: "flex", minHeight: "100vh" }}>
+      {/* Top AppBar - Clean */}
       <AppBar
         position="fixed"
         sx={{
@@ -107,23 +147,14 @@ export default function Layout({ children }) {
           >
             <MenuIcon />
           </IconButton>
-          <Typography variant="h6" noWrap component="div" sx={{ flexGrow: 1 }}>
+
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             {currentTenant?.name || "Dashboard"}
           </Typography>
-          <Box
-            sx={{ display: "flex", alignItems: "center", gap: 1, cursor: "pointer" }}
-            onClick={() => setSwitcherOpen(true)}
-          >
-            <IconWithTooltip
-            icon={AccountCircleIcon}
-            tooltip="User Profile"
-            style={{ fontSize: 40, cursor: "pointer" }}/>
-          </Box>
-
-          {/* You can also add a small icon button here */}
         </Toolbar>
       </AppBar>
 
+      {/* Side Navigation */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
@@ -136,7 +167,10 @@ export default function Layout({ children }) {
           ModalProps={{ keepMounted: true }}
           sx={{
             display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
           }}
         >
           {drawer}
@@ -145,16 +179,20 @@ export default function Layout({ children }) {
         {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
+          open
           sx={{
             display: { xs: "none", sm: "block" },
-            "& .MuiDrawer-paper": { boxSizing: "border-box", width: drawerWidth },
+            "& .MuiDrawer-paper": {
+              boxSizing: "border-box",
+              width: drawerWidth,
+            },
           }}
-          open
         >
           {drawer}
         </Drawer>
       </Box>
 
+      {/* Main Content */}
       <Box
         component="main"
         sx={{
@@ -162,12 +200,43 @@ export default function Layout({ children }) {
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
           mt: 8,
+          mb: isMobile ? 8 : 0, // space for bottom nav
         }}
       >
         {children}
       </Box>
 
-      {/* Bottom Sheet */}
+      {/* Bottom Navigation - Only on Mobile */}
+      {isMobile && (
+        <Paper
+          sx={{
+            position: "fixed",
+            bottom: 0,
+            left: 0,
+            right: 0,
+            zIndex: 1200,
+          }}
+          elevation={8}
+        >
+          <BottomNavigation
+            showLabels
+            value={bottomNavValue === -1 ? 0 : bottomNavValue}
+            onChange={(e, newValue) => {
+              navigate(menuItems[newValue].path);
+            }}
+          >
+            {menuItems.map((item) => (
+              <BottomNavigationAction
+                key={item.text}
+                label={item.text}
+                icon={item.icon}
+              />
+            ))}
+          </BottomNavigation>
+        </Paper>
+      )}
+
+      {/* Business Switcher Bottom Sheet */}
       <BusinessSwitcher
         open={switcherOpen}
         onClose={() => setSwitcherOpen(false)}
