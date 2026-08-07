@@ -87,13 +87,11 @@ function AppRoutes() {
 
 function App() {
   return (
-    <AuthProvider>
       <ToastProvider>
         <BrowserRouter>
           <AppRoutes />
         </BrowserRouter>
       </ToastProvider>
-    </AuthProvider>
   );
 }
 

@@ -113,9 +113,13 @@ export default function BusinessProfile() {
       const res = await api.patch("/business/profile", form);
       setProfile(res.data);
 
-      if (currentTenant && res.data.name !== currentTenant.name) {
-        selectTenant({ ...currentTenant, name: res.data.name });
-      }
+      // IMPORTANT: update the currentTenant so the theme reacts immediately
+      selectTenant({
+        ...currentTenant,
+        name: res.data.name,
+        themeColor: res.data.themeColor,
+        themeMode: res.data.themeMode,
+      });
 
       setEditing(false);
       showToast("Business profile updated successfully", "success");
