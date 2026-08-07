@@ -29,6 +29,9 @@ import LogoutIcon from "@mui/icons-material/Logout";
 import { useAuth } from "../context/AuthContext";
 import BusinessSwitcher from "./BusinessSwitcher";
 import usePermission from "../hooks/usePermission";
+import { useAppTheme } from "../theme/ThemeContext";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 
 const drawerWidth = 260;
 
@@ -44,6 +47,7 @@ export default function Layout({ children }) {
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
+  const { mode, toggleMode } = useAppTheme();
 
   const handleLogout = () => {
     logout();
@@ -110,6 +114,17 @@ export default function Layout({ children }) {
 
       <Divider />
 
+      <List>
+        <ListItem disablePadding>
+          <ListItemButton onClick={toggleMode}>
+            <ListItemIcon>
+              {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+            </ListItemIcon>
+            <ListItemText primary={mode === "light" ? "Dark Mode" : "Light Mode"} />
+          </ListItemButton>
+        </ListItem>
+      </List>
+      
       {/* Logout */}
       <List>
         <ListItem disablePadding>

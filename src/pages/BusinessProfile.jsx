@@ -46,6 +46,8 @@ export default function BusinessProfile() {
     description: "",
     logo: "",
     visitingCard: "",
+    themeColor: "#0D9488",
+    themeMode: "light",
   });
 
   const logoInputRef = useRef(null);
@@ -65,6 +67,7 @@ export default function BusinessProfile() {
         description: res.data.description || "",
         logo: res.data.logo || "",
         visitingCard: res.data.visitingCard || "",
+        themeColor: res.data.themeColor || "#0D9488",
       });
     } catch (err) {
       showToast(err.response?.data?.message || "Failed to load profile", "error");
@@ -137,6 +140,7 @@ export default function BusinessProfile() {
       description: profile?.description || "",
       logo: profile?.logo || "",
       visitingCard: profile?.visitingCard || "",
+      themeColor: profile?.themeColor || "#0D9488",
     });
     setEditing(false);
   };
@@ -440,6 +444,72 @@ export default function BusinessProfile() {
                 multiline
                 rows={4}
               />
+
+              {/* Theme Color */}
+              {isOwner && (
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Business Theme Color
+                  </Typography>
+                  <Stack direction="row" spacing={2} alignItems="center">
+                    <Box
+                      sx={{
+                        width: 48,
+                        height: 48,
+                        borderRadius: 2,
+                        bgcolor: form.themeColor,
+                        border: "2px solid",
+                        borderColor: "divider",
+                        cursor: editing ? "pointer" : "default",
+                      }}
+                    />
+                    <TextField
+                      type="color"
+                      value={form.themeColor}
+                      onChange={handleChange("themeColor")}
+                      disabled={!editing}
+                      sx={{
+                        width: 80,
+                        "& input": {
+                          cursor: editing ? "pointer" : "default",
+                          height: 40,
+                          padding: 0.5,
+                        },
+                      }}
+                    />
+                    <Typography variant="body2" color="text.secondary">
+                      {form.themeColor}
+                    </Typography>
+                  </Stack>
+                </Box>
+              )}
+
+               {/* Theme Mode */}
+              {isOwner && (
+                <Box>
+                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
+                    Default Theme Mode
+                  </Typography>
+                  <Stack direction="row" spacing={1}>
+                    <Button
+                      variant={form.themeMode === "light" ? "contained" : "outlined"}
+                      onClick={() => setForm(prev => ({ ...prev, themeMode: "light" }))}
+                      disabled={!editing}
+                      size="small"
+                    >
+                      Light
+                    </Button>
+                    <Button
+                      variant={form.themeMode === "dark" ? "contained" : "outlined"}
+                      onClick={() => setForm(prev => ({ ...prev, themeMode: "dark" }))}
+                      disabled={!editing}
+                      size="small"
+                    >
+                      Dark
+                    </Button>
+                  </Stack>
+                </Box>
+              )}
             </Stack>
           </Paper>
         </Grid>
