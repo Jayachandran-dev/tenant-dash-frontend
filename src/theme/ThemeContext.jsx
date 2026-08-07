@@ -25,9 +25,9 @@ export function AppThemeProvider({ children }) {
 
   const primaryColor = currentTenant?.themeColor || "#0D9488";
 
-  const theme = useMemo(() => {
-    return generateTheme(primaryColor, mode);
-  }, [primaryColor, mode]);
+    const theme = useMemo(() => {
+      return generateTheme(primaryColor, mode);
+    }, [primaryColor, mode, currentTenant?.id]); // added currentTenant.id
 
   const toggleMode = async () => {
     const next = mode === "light" ? "dark" : "light";
