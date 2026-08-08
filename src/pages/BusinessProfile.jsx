@@ -252,7 +252,7 @@ export default function BusinessProfile() {
         <Grid item xs={12} md={4}>
           <Stack spacing={2}>
             {/* Logo - Square ratio */}
-            <Paper sx={{ p: 2, borderRadius: 3 }}>
+            <Paper sx={{ p: 2, borderRadius: 1 }}>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
@@ -325,7 +325,7 @@ export default function BusinessProfile() {
             </Paper>
 
             {/* Visiting Card - 1.75:1 ratio */}
-            <Paper sx={{ p: 2, borderRadius: 3 }}>
+            <Paper sx={{ p: 2, borderRadius: 1 }}>
               <Typography
                 variant="subtitle2"
                 color="text.secondary"
@@ -409,7 +409,7 @@ export default function BusinessProfile() {
 
         {/* Details Section */}
         <Grid item xs={12} md={8}>
-          <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 3 }}>
+          <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 1 }}>
             <Stack spacing={2.5}>
               <TextField
                 label="Business Name"

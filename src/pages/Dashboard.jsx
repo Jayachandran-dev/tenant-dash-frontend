@@ -83,7 +83,7 @@ export default function Dashboard() {
         sx={{
           p: 3,
           mb: 3,
-          borderRadius: 3,
+          borderRadius: 1,
           background: "linear-gradient(135deg, #1976d2 0%, #42a5f5 100%)",
           color: "white",
         }}
@@ -121,7 +121,7 @@ export default function Dashboard() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {stats.map((stat) => (
           <Grid item xs={12} sm={4} key={stat.title}>
-            <Card sx={{ borderRadius: 3, height: "100%" }}>
+            <Card sx={{ borderRadius: 1, height: "100%" }}>
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Box>
@@ -132,7 +132,7 @@ export default function Dashboard() {
                       {stat.value}
                     </Typography>
                   </Box>
-                  <Avatar sx={{ bgcolor: stat.color, width: 48, height: 48 }}>
+                  <Avatar sx={{ bgcolor: stat.color, width: 48, height: 48, borderRadius: 1 }}>
                     {stat.icon}
                   </Avatar>
                 </Stack>
@@ -143,7 +143,7 @@ export default function Dashboard() {
       </Grid>
 
       {/* Items Section */}
-      <Paper sx={{ p: 3, borderRadius: 3 }}>
+      <Paper sx={{ p: 3, borderRadius: 1 }}>
         <Typography variant="h6" fontWeight={600} gutterBottom>
           Recent Items
         </Typography>
