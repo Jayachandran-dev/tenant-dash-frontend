@@ -69,7 +69,7 @@ export default function CommonList({
           </Typography>
 
           {onAdd && (
-            <Button variant="contained" onClick={onAdd} sx={{ ml: "auto" }}>
+            <Button variant="contained" onClick={onAdd} sx={{ ml: "auto", borderRadius: 0.5 }}>
               {addButtonLabel}
             </Button>
           )}
@@ -85,7 +85,7 @@ export default function CommonList({
             </Paper>
           ) : (
             rows.map((row) => (
-              <Card key={getRowId(row)} variant="outlined" sx={{ borderRadius: 2 }}>
+              <Card key={getRowId(row)} variant="outlined" sx={{ borderRadius: 1 }}>
                 <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
                   {columns.map((col, index) => (
                     <Box key={col.id} sx={{ mb: index === columns.length - 1 ? 0 : 1 }}>
