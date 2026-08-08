@@ -106,6 +106,89 @@ export function AuthProvider({ children }) {
     };
   }, [currentTenant?.id]);
 
+  // Re-sync when tab becomes visible again (handles inactive / sleep cases)
+  useEffect(() => {
+    if (!currentTenant?.id || !user) return;
+
+    const syncBusinessProfile = async () => {
+      try {
+        const res = await api.get("/business/profile");
+        const updated = res.data;
+
+        setCurrentTenant((prev) => {
+          if (!prev || prev.id !== updated.id) return prev;
+          return {
+            ...prev,
+            name: updated.name,
+            themeColor: updated.themeColor,
+            themeMode: updated.themeMode,
+            logo: updated.logo,
+          };
+        });
+
+        setTenants((prev) =>
+          prev.map((t) =>
+            t.id === updated.id
+              ? {
+                  ...t,
+                  name: updated.name,
+                  themeColor: updated.themeColor,
+                  themeMode: updated.themeMode,
+                }
+              : t
+          )
+        );
+
+        // keep localStorage in sync
+        const stored = JSON.parse(localStorage.getItem("tenants") || "[]");
+        localStorage.setItem(
+          "tenants",
+          JSON.stringify(
+            stored.map((t) =>
+              t.id === updated.id
+                ? {
+                    ...t,
+                    name: updated.name,
+                    themeColor: updated.themeColor,
+                    themeMode: updated.themeMode,
+                  }
+                : t
+            )
+          )
+        );
+      } catch (err) {
+        console.log("Sync on focus failed", err);
+      }
+    };
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        // Tab is active again → re-fetch latest data
+        syncBusinessProfile();
+
+        // Ensure socket is connected and joined
+        if (!socket.connected) {
+          socket.connect();
+        }
+        socket.emit("join-tenant", currentTenant.id);
+      }
+    };
+
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    // Also re-sync on socket reconnect
+    const handleReconnect = () => {
+      socket.emit("join-tenant", currentTenant.id);
+      syncBusinessProfile();
+    };
+
+    socket.on("reconnect", handleReconnect);
+
+    return () => {
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+      socket.off("reconnect", handleReconnect);
+    };
+  }, [currentTenant?.id, user]);
   // ---------- Auth methods ----------
   const sendOtp = async (mobile) => {
     const res = await api.post("/auth/send-otp", { mobile });
