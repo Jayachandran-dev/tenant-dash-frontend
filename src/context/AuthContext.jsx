@@ -12,34 +12,80 @@ export function AuthProvider({ children }) {
 
   // ---------- Restore session ----------
   useEffect(() => {
-    const storedUser = localStorage.getItem("user");
-    const storedTenants = localStorage.getItem("tenants");
-    const storedTenantId = localStorage.getItem("tenantId");
-    const token = localStorage.getItem("token");
+    const restoreSession = async () => {
+      const storedUser = localStorage.getItem("user");
+      const storedTenants = localStorage.getItem("tenants");
+      const storedTenantId = localStorage.getItem("tenantId");
+      const token = localStorage.getItem("token");
 
-    if (storedUser && token) {
-      const parsedUser = JSON.parse(storedUser);
-      const parsedTenants = storedTenants ? JSON.parse(storedTenants) : [];
+      if (storedUser && token) {
+        const parsedUser = JSON.parse(storedUser);
+        const parsedTenants = storedTenants ? JSON.parse(storedTenants) : [];
 
-      setUser(parsedUser);
-      setTenants(parsedTenants);
+        setUser(parsedUser);
+        setTenants(parsedTenants);
 
-      if (storedTenantId && parsedTenants.length > 0) {
-        const found = parsedTenants.find(
-          (t) => t.id === parseInt(storedTenantId)
-        );
-        setCurrentTenant(found || parsedTenants[0] || null);
-      } else if (parsedTenants.length === 1) {
-        setCurrentTenant(parsedTenants[0]);
-        localStorage.setItem("tenantId", parsedTenants[0].id);
+        let activeTenant = null;
+
+        if (storedTenantId && parsedTenants.length > 0) {
+          activeTenant =
+            parsedTenants.find((t) => t.id === parseInt(storedTenantId)) ||
+            parsedTenants[0];
+        } else if (parsedTenants.length === 1) {
+          activeTenant = parsedTenants[0];
+          localStorage.setItem("tenantId", parsedTenants[0].id);
+        }
+
+        if (activeTenant) {
+          setCurrentTenant(activeTenant);
+
+          // Connect socket
+          if (!socket.connected) {
+            socket.connect();
+          }
+          socket.emit("join-tenant", activeTenant.id);
+
+          // ★ IMPORTANT: Fetch latest business profile on first load
+          try {
+            // Temporarily set header so the request knows the tenant
+            // (your axios interceptor already reads tenantId from localStorage)
+            const res = await api.get("/business/profile");
+            const latest = res.data;
+
+            const updatedTenant = {
+              ...activeTenant,
+              name: latest.name,
+              themeColor: latest.themeColor,
+              themeMode: latest.themeMode,
+              logo: latest.logo,
+            };
+
+            setCurrentTenant(updatedTenant);
+
+            // Update tenants list + localStorage
+            const newTenants = parsedTenants.map((t) =>
+              t.id === latest.id
+                ? {
+                    ...t,
+                    name: latest.name,
+                    themeColor: latest.themeColor,
+                    themeMode: latest.themeMode,
+                  }
+                : t
+            );
+            setTenants(newTenants);
+            localStorage.setItem("tenants", JSON.stringify(newTenants));
+          } catch (err) {
+            console.log("Failed to sync business profile on load", err);
+            // Keep localStorage data if API fails (offline etc.)
+          }
+        }
       }
 
-      // Connect socket after restoring session
-      if (!socket.connected) {
-        socket.connect();
-      }
-    }
-    setLoading(false);
+      setLoading(false);
+    };
+
+    restoreSession();
   }, []);
 
   // ---------- Join / Leave tenant room + listen for updates ----------
