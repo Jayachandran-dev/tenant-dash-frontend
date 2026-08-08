@@ -22,6 +22,7 @@ import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import usePermission from "../hooks/usePermission";
 import { uploadImageToCloudinary } from "../utils/uploadImage";
+import { socket } from "../socket";
 
 export default function BusinessProfile() {
   const { currentTenant, selectTenant } = useAuth();
@@ -79,6 +80,31 @@ export default function BusinessProfile() {
   useEffect(() => {
     fetchProfile();
   }, [currentTenant]);
+
+  useEffect(() => {
+  const handleUpdate = (updated) => {
+    if (updated.id === currentTenant?.id) {
+      setProfile(updated);
+      setForm((prev) => ({
+        ...prev,
+        name: updated.name || "",
+        phone: updated.phone || "",
+        email: updated.email || "",
+        tagline: updated.tagline || "",
+        address: updated.address || "",
+        website: updated.website || "",
+        description: updated.description || "",
+        logo: updated.logo || "",
+        visitingCard: updated.visitingCard || "",
+        themeColor: updated.themeColor || "#0D9488",
+        themeMode: updated.themeMode || "light",
+      }));
+    }
+  };
+
+  socket.on("business:updated", handleUpdate);
+  return () => socket.off("business:updated", handleUpdate);
+}, [currentTenant?.id]);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
