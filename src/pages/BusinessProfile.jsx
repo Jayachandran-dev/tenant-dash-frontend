@@ -260,6 +260,7 @@ export default function BusinessProfile() {
           <Stack spacing={2.5}>
             <TextField
               label="Business Name"
+              InputLabelProps={{ shrink: true }}
               value={form.name}
               onChange={handleChange("name")}
               fullWidth
@@ -269,6 +270,7 @@ export default function BusinessProfile() {
 
             <TextField
               label="Service Tagline"
+              InputLabelProps={{ shrink: true }}
               value={form.tagline}
               onChange={handleChange("tagline")}
               fullWidth
@@ -279,45 +281,54 @@ export default function BusinessProfile() {
             <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField
                 label="Business Phone"
+                InputLabelProps={{ shrink: true }}
                 value={form.phone}
                 onChange={handleChange("phone")}
                 fullWidth
                 disabled={!editing}
+                placeholder={!editing ? "Not set" : ""}
               />
               <TextField
                 label="Business Email"
+                InputLabelProps={{ shrink: true }}
                 value={form.email}
                 onChange={handleChange("email")}
                 fullWidth
                 disabled={!editing}
+                placeholder={!editing ? "Not set" : ""}
               />
             </Stack>
 
             <TextField
               label="Website"
+              InputLabelProps={{ shrink: true }}
               value={form.website}
               onChange={handleChange("website")}
               fullWidth
               disabled={!editing}
-              placeholder="https://example.com"
+              placeholder={editing ? "https://example.com" : "Not set"}
             />
 
             <TextField
               label="Address"
+              InputLabelProps={{ shrink: true }}
               value={form.address}
               onChange={handleChange("address")}
               fullWidth
               disabled={!editing}
+              placeholder={!editing ? "Not set" : ""}
               multiline
               rows={2}
             />
 
             <TextField
               label="About / Description"
+              InputLabelProps={{ shrink: true }}
               value={form.description}
               onChange={handleChange("description")}
               fullWidth
               disabled={!editing}
+              placeholder={!editing ? "Not set" : ""}
               multiline
               rows={4}
             />
