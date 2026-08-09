@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import {
   Box,
   Typography,
@@ -6,23 +6,39 @@ import {
   TextField,
   Button,
   Stack,
-  Avatar,
-  Grid,
   CircularProgress,
-  IconButton,
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import EditIcon from "@mui/icons-material/Edit";
 import SaveIcon from "@mui/icons-material/Save";
 import CloseIcon from "@mui/icons-material/Close";
+import BadgeOutlinedIcon from "@mui/icons-material/BadgeOutlined";
+import PaletteOutlinedIcon from "@mui/icons-material/PaletteOutlined";
+import ImageOutlinedIcon from "@mui/icons-material/ImageOutlined";
 import api from "../api/axios";
 import { useAuth } from "../context/AuthContext";
 import { useToast } from "../context/ToastContext";
 import usePermission from "../hooks/usePermission";
 import { uploadImageToCloudinary } from "../utils/uploadImage";
 import { socket } from "../socket";
+import ImageUploadCard from "../components/ImageUploadCard";
+import AppearanceSection from "../components/AppearanceSection";
+import PageHeader from "../components/PageHeader";
+
+// Shared "soft & friendly" card styling — one place to tune the whole design system.
+const cardSx = {
+  p: { xs: 2, sm: 3 },
+  borderRadius: 1,
+  boxShadow: "0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04)",
+  border: "1px solid",
+  borderColor: "divider",
+};
+
+// Fixed compact width for the logo / visiting card row on wider screens —
+// keeps them side by side and sized sensibly instead of stretching to
+// fill half of a very wide content column.
+const COMPACT_CARD_WIDTH = { xs: "100%", sm: 300 };
 
 export default function BusinessProfile() {
   const { currentTenant, selectTenant } = useAuth();
@@ -36,6 +52,7 @@ export default function BusinessProfile() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState({ logo: false, visitingCard: false });
+  const [tab, setTab] = useState(0);
 
   const [form, setForm] = useState({
     name: "",
@@ -50,9 +67,6 @@ export default function BusinessProfile() {
     themeColor: "#0D9488",
     themeMode: "light",
   });
-
-  const logoInputRef = useRef(null);
-  const cardInputRef = useRef(null);
 
   const fetchProfile = async () => {
     try {
@@ -82,29 +96,29 @@ export default function BusinessProfile() {
   }, [currentTenant]);
 
   useEffect(() => {
-  const handleUpdate = (updated) => {
-    if (updated.id === currentTenant?.id) {
-      setProfile(updated);
-      setForm((prev) => ({
-        ...prev,
-        name: updated.name || "",
-        phone: updated.phone || "",
-        email: updated.email || "",
-        tagline: updated.tagline || "",
-        address: updated.address || "",
-        website: updated.website || "",
-        description: updated.description || "",
-        logo: updated.logo || "",
-        visitingCard: updated.visitingCard || "",
-        themeColor: updated.themeColor || "#0D9488",
-        themeMode: updated.themeMode || "light",
-      }));
-    }
-  };
+    const handleUpdate = (updated) => {
+      if (updated.id === currentTenant?.id) {
+        setProfile(updated);
+        setForm((prev) => ({
+          ...prev,
+          name: updated.name || "",
+          phone: updated.phone || "",
+          email: updated.email || "",
+          tagline: updated.tagline || "",
+          address: updated.address || "",
+          website: updated.website || "",
+          description: updated.description || "",
+          logo: updated.logo || "",
+          visitingCard: updated.visitingCard || "",
+          themeColor: updated.themeColor || "#0D9488",
+          themeMode: updated.themeMode || "light",
+        }));
+      }
+    };
 
-  socket.on("business:updated", handleUpdate);
-  return () => socket.off("business:updated", handleUpdate);
-}, [currentTenant?.id]);
+    socket.on("business:updated", handleUpdate);
+    return () => socket.off("business:updated", handleUpdate);
+  }, [currentTenant?.id]);
 
   const handleChange = (field) => (e) => {
     setForm((prev) => ({ ...prev, [field]: e.target.value }));
@@ -183,367 +197,174 @@ export default function BusinessProfile() {
     );
   }
 
+  const tabs = [
+    { label: "Details", icon: <BadgeOutlinedIcon fontSize="small" /> },
+    { label: "Branding", icon: <ImageOutlinedIcon fontSize="small" /> },
+    ...(isOwner
+      ? [{ label: "Appearance", icon: <PaletteOutlinedIcon fontSize="small" /> }]
+      : []),
+  ];
+
+  const headerActions = isOwner ? (
+    editing ? (
+      <Stack direction="row" spacing={1}>
+        <Button
+          variant="outlined"
+          size={isMobile ? "small" : "medium"}
+          startIcon={<CloseIcon />}
+          onClick={handleCancel}
+          disabled={saving}
+          sx={{ borderRadius: 1 }}
+        >
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
+          size={isMobile ? "small" : "medium"}
+          startIcon={<SaveIcon />}
+          onClick={handleSave}
+          disabled={saving}
+          sx={{ borderRadius: 1 }}
+        >
+          {saving ? "Saving..." : "Save"}
+        </Button>
+      </Stack>
+    ) : (
+      <Button
+        variant="contained"
+        size={isMobile ? "small" : "medium"}
+        startIcon={<EditIcon />}
+        onClick={() => setEditing(true)}
+        sx={{ borderRadius: 1 }}
+      >
+        Edit
+      </Button>
+    )
+  ) : null;
+
   return (
     <Box>
-      {/* ========== STICKY HEADER ========== */}
-      <Box
-        sx={{
-          position: "sticky",
-          top: 64,
-          zIndex: 10,
-          bgcolor: "background.default",
-          pb: 2,
-          pt: 1,
-          mb: 2,
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          flexWrap="wrap"
-          gap={1}
-        >
-          <Typography variant="h5" fontWeight={600}>
-            Business Profile
-          </Typography>
+      {/* Standard page header — title left, actions pinned right, tabs below.
+          Reuse this same PageHeader on every future page for a consistent layout. */}
+      <PageHeader
+        title="Business Profile"
+        actions={headerActions}
+        tabs={tabs}
+        tabValue={tab}
+        onTabChange={(_, v) => setTab(v)}
+      />
 
-          {isOwner && (
-            <Box>
-              {editing ? (
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="outlined"
-                    size={isMobile ? "small" : "medium"}
-                    startIcon={<CloseIcon />}
-                    onClick={handleCancel}
-                    disabled={saving}
-                  >
-                    Cancel
-                  </Button>
-                  <Button
-                    variant="contained"
-                    size={isMobile ? "small" : "medium"}
-                    startIcon={<SaveIcon />}
-                    onClick={handleSave}
-                    disabled={saving}
-                  >
-                    {saving ? "Saving..." : "Save"}
-                  </Button>
-                </Stack>
-              ) : (
-                <Button
-                  variant="contained"
-                  size={isMobile ? "small" : "medium"}
-                  startIcon={<EditIcon />}
-                  onClick={() => setEditing(true)}
-                >
-                  Edit Profile
-                </Button>
-              )}
-            </Box>
-          )}
-        </Stack>
-      </Box>
+      {/* ========== DETAILS TAB ========== */}
+      {tab === 0 && (
+        <Paper sx={cardSx}>
+          <Stack spacing={2.5}>
+            <TextField
+              label="Business Name"
+              value={form.name}
+              onChange={handleChange("name")}
+              fullWidth
+              disabled={!editing}
+              required
+            />
 
-      {/* ========== CONTENT ========== */}
-      <Grid container spacing={2}>
-        {/* Images Section */}
-        <Grid item xs={12} md={4}>
-          <Stack spacing={2}>
-            {/* Logo - Square ratio */}
-            <Paper sx={{ p: 2, borderRadius: 1 }}>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                gutterBottom
-              >
-                Business Logo
-              </Typography>
+            <TextField
+              label="Service Tagline"
+              value={form.tagline}
+              onChange={handleChange("tagline")}
+              fullWidth
+              disabled={!editing}
+              placeholder="e.g. Quality services at affordable prices"
+            />
 
-              <Box
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  aspectRatio: "1 / 1",
-                  maxWidth: 220,
-                  mx: "auto",
-                  mt: 1,
-                }}
-              >
-                <Avatar
-                  src={form.logo || undefined}
-                  variant="rounded"
-                  sx={{
-                    width: "100%",
-                    height: "100%",
-                    fontSize: 40,
-                  }}
-                >
-                  {form.name?.charAt(0) || "B"}
-                </Avatar>
-
-                {editing && (
-                  <IconButton
-                    color="primary"
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      bottom: 8,
-                      right: 8,
-                      bgcolor: "background.paper",
-                      border: "1px solid #ddd",
-                      "&:hover": { bgcolor: "grey.100" },
-                    }}
-                    disabled={uploading.logo}
-                  >
-                    <PhotoCameraIcon fontSize="small" />
-                    <input
-                      hidden
-                      type="file"
-                      accept="image/*"
-                      ref={logoInputRef}
-                      onChange={(e) =>
-                        handleImageUpload("logo", e.target.files?.[0])
-                      }
-                    />
-                  </IconButton>
-                )}
-              </Box>
-
-              {uploading.logo && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  textAlign="center"
-                  mt={1}
-                >
-                  Uploading...
-                </Typography>
-              )}
-            </Paper>
-
-            {/* Visiting Card - 1.75:1 ratio */}
-            <Paper sx={{ p: 2, borderRadius: 1 }}>
-              <Typography
-                variant="subtitle2"
-                color="text.secondary"
-                gutterBottom
-              >
-                Visiting Card
-              </Typography>
-
-              <Box
-                sx={{
-                  position: "relative",
-                  width: "100%",
-                  aspectRatio: "1.75 / 1",
-                  bgcolor: "grey.100",
-                  borderRadius: 2,
-                  overflow: "hidden",
-                  mt: 1,
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                {form.visitingCard ? (
-                  <Box
-                    component="img"
-                    src={form.visitingCard}
-                    alt="Visiting Card"
-                    sx={{
-                      width: "100%",
-                      height: "100%",
-                      objectFit: "cover",
-                    }}
-                  />
-                ) : (
-                  <Typography color="text.secondary" variant="body2">
-                    No visiting card
-                  </Typography>
-                )}
-
-                {editing && (
-                  <IconButton
-                    color="primary"
-                    component="label"
-                    sx={{
-                      position: "absolute",
-                      bottom: 8,
-                      right: 8,
-                      bgcolor: "background.paper",
-                      border: "1px solid #ddd",
-                    }}
-                    disabled={uploading.visitingCard}
-                  >
-                    <PhotoCameraIcon fontSize="small" />
-                    <input
-                      hidden
-                      type="file"
-                      accept="image/*"
-                      ref={cardInputRef}
-                      onChange={(e) =>
-                        handleImageUpload("visitingCard", e.target.files?.[0])
-                      }
-                    />
-                  </IconButton>
-                )}
-              </Box>
-
-              {uploading.visitingCard && (
-                <Typography
-                  variant="caption"
-                  color="text.secondary"
-                  display="block"
-                  textAlign="center"
-                  mt={1}
-                >
-                  Uploading...
-                </Typography>
-              )}
-            </Paper>
-          </Stack>
-        </Grid>
-
-        {/* Details Section */}
-        <Grid item xs={12} md={8}>
-          <Paper sx={{ p: { xs: 2, sm: 3 }, borderRadius: 1 }}>
-            <Stack spacing={2.5}>
+            <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
               <TextField
-                label="Business Name"
-                value={form.name}
-                onChange={handleChange("name")}
+                label="Business Phone"
+                value={form.phone}
+                onChange={handleChange("phone")}
                 fullWidth
                 disabled={!editing}
-                required
               />
-
               <TextField
-                label="Service Tagline"
-                value={form.tagline}
-                onChange={handleChange("tagline")}
+                label="Business Email"
+                value={form.email}
+                onChange={handleChange("email")}
                 fullWidth
                 disabled={!editing}
-                placeholder="e.g. Quality services at affordable prices"
               />
-
-              <Stack direction={{ xs: "column", sm: "row" }} spacing={2}>
-                <TextField
-                  label="Business Phone"
-                  value={form.phone}
-                  onChange={handleChange("phone")}
-                  fullWidth
-                  disabled={!editing}
-                />
-                <TextField
-                  label="Business Email"
-                  value={form.email}
-                  onChange={handleChange("email")}
-                  fullWidth
-                  disabled={!editing}
-                />
-              </Stack>
-
-              <TextField
-                label="Website"
-                value={form.website}
-                onChange={handleChange("website")}
-                fullWidth
-                disabled={!editing}
-                placeholder="https://example.com"
-              />
-
-              <TextField
-                label="Address"
-                value={form.address}
-                onChange={handleChange("address")}
-                fullWidth
-                disabled={!editing}
-                multiline
-                rows={2}
-              />
-
-              <TextField
-                label="About / Description"
-                value={form.description}
-                onChange={handleChange("description")}
-                fullWidth
-                disabled={!editing}
-                multiline
-                rows={4}
-              />
-
-              {/* Theme Color */}
-              {isOwner && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Business Theme Color
-                  </Typography>
-                  <Stack direction="row" spacing={2} alignItems="center">
-                    <Box
-                      sx={{
-                        width: 48,
-                        height: 48,
-                        borderRadius: 2,
-                        bgcolor: form.themeColor,
-                        border: "2px solid",
-                        borderColor: "divider",
-                        cursor: editing ? "pointer" : "default",
-                      }}
-                    />
-                    <TextField
-                      type="color"
-                      value={form.themeColor}
-                      onChange={handleChange("themeColor")}
-                      disabled={!editing}
-                      sx={{
-                        width: 80,
-                        "& input": {
-                          cursor: editing ? "pointer" : "default",
-                          height: 40,
-                          padding: 0.5,
-                        },
-                      }}
-                    />
-                    <Typography variant="body2" color="text.secondary">
-                      {form.themeColor}
-                    </Typography>
-                  </Stack>
-                </Box>
-              )}
-
-               {/* Theme Mode */}
-              {isOwner && (
-                <Box>
-                  <Typography variant="subtitle2" color="text.secondary" gutterBottom>
-                    Default Theme Mode
-                  </Typography>
-                  <Stack direction="row" spacing={1}>
-                    <Button
-                      variant={form.themeMode === "light" ? "contained" : "outlined"}
-                      onClick={() => setForm(prev => ({ ...prev, themeMode: "light" }))}
-                      disabled={!editing}
-                      size="small"
-                    >
-                      Light
-                    </Button>
-                    <Button
-                      variant={form.themeMode === "dark" ? "contained" : "outlined"}
-                      onClick={() => setForm(prev => ({ ...prev, themeMode: "dark" }))}
-                      disabled={!editing}
-                      size="small"
-                    >
-                      Dark
-                    </Button>
-                  </Stack>
-                </Box>
-              )}
             </Stack>
-          </Paper>
-        </Grid>
-      </Grid>
+
+            <TextField
+              label="Website"
+              value={form.website}
+              onChange={handleChange("website")}
+              fullWidth
+              disabled={!editing}
+              placeholder="https://example.com"
+            />
+
+            <TextField
+              label="Address"
+              value={form.address}
+              onChange={handleChange("address")}
+              fullWidth
+              disabled={!editing}
+              multiline
+              rows={2}
+            />
+
+            <TextField
+              label="About / Description"
+              value={form.description}
+              onChange={handleChange("description")}
+              fullWidth
+              disabled={!editing}
+              multiline
+              rows={4}
+            />
+          </Stack>
+        </Paper>
+      )}
+
+      {/* ========== BRANDING TAB ========== */}
+      {tab === 1 && (
+        <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2 }}>
+          <Box sx={{ width: COMPACT_CARD_WIDTH }}>
+            <ImageUploadCard
+              title="Business Logo"
+              image={form.logo}
+              aspectRatio="1 / 1"
+              editing={editing}
+              uploading={uploading.logo}
+              onUpload={(file) => handleImageUpload("logo", file)}
+              emptyLabel={form.name?.charAt(0)?.toUpperCase()}
+              helperText="Square image works best · PNG or JPG, up to 5MB"
+            />
+          </Box>
+
+          <Box sx={{ width: COMPACT_CARD_WIDTH }}>
+            <ImageUploadCard
+              title="Visiting Card"
+              image={form.visitingCard}
+              aspectRatio="1.75 / 1"
+              editing={editing}
+              uploading={uploading.visitingCard}
+              onUpload={(file) => handleImageUpload("visitingCard", file)}
+              helperText="Landscape image works best · PNG or JPG, up to 5MB"
+            />
+          </Box>
+        </Box>
+      )}
+
+      {/* ========== APPEARANCE TAB (owner only) ========== */}
+      {tab === 2 && isOwner && (
+        <AppearanceSection
+          themeColor={form.themeColor}
+          themeMode={form.themeMode}
+          editing={editing}
+          onColorChange={handleChange("themeColor")}
+          onModeChange={(mode) => setForm((prev) => ({ ...prev, themeMode: mode }))}
+        />
+      )}
     </Box>
   );
 }
