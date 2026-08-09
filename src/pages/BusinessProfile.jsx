@@ -247,7 +247,7 @@ export default function BusinessProfile() {
       {/* Standard page header — title left, actions pinned right, tabs below.
           Reuse this same PageHeader on every future page for a consistent layout. */}
       <PageHeader
-        title="Business"
+        title="Business Profile"
         actions={headerActions}
         tabs={tabs}
         tabValue={tab}
