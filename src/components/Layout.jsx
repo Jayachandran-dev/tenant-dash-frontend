@@ -215,7 +215,7 @@ export default function Layout({ children }) {
           flexGrow: 1,
           p: 3,
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: 8,
+          mt: isMobile ? 7 : 8, // matches actual AppBar height: 56px mobile / 64px desktop
           mb: isMobile ? 8 : 0, // space for bottom nav
         }}
       >
