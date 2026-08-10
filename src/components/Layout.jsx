@@ -21,7 +21,6 @@ import {
   useMediaQuery,
   useTheme,
 } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
@@ -38,8 +37,21 @@ import { useAppTheme } from "../theme/ThemeContext";
 
 const drawerWidth = 260;
 
+// Map path → short title for AppBar (mobile)
+const pageTitles = {
+  "/dashboard": "Home",
+  "/items": "Items",
+  "/users": "Users",
+  "/business-profile": "Business",
+  "/settings": "Settings",
+};
+
+function getPageTitle(pathname) {
+  const match = Object.keys(pageTitles).find((p) => pathname.startsWith(p));
+  return match ? pageTitles[match] : "App";
+}
+
 export default function Layout({ children }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
   const [moreOpen, setMoreOpen] = useState(false);
 
@@ -51,15 +63,12 @@ export default function Layout({ children }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-
   const handleLogout = () => {
     setMoreOpen(false);
     logout();
     navigate("/login");
   };
 
-  // Full menu (desktop drawer + More sheet)
   const allMenuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Items", icon: <InventoryIcon />, path: "/items" },
@@ -74,17 +83,15 @@ export default function Layout({ children }) {
     { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
   ];
 
-  // Primary destinations only (mobile bottom nav)
   const mobileNavItems = [
     { text: "Home", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Items", icon: <InventoryIcon />, path: "/items" },
-    { text: "More", icon: <MoreHorizIcon />, path: null }, // opens sheet
+    { text: "More", icon: <MoreHorizIcon />, path: null },
   ];
 
   const goTo = (path) => {
     if (!path) return;
     navigate(path);
-    setMobileOpen(false);
     setMoreOpen(false);
   };
 
@@ -155,7 +162,7 @@ export default function Layout({ children }) {
     </Box>
   );
 
-  // ========== MORE BOTTOM SHEET (mobile) ==========
+  // ========== MORE SHEET (mobile) ==========
   const moreSheet = (
     <Drawer
       anchor="bottom"
@@ -171,7 +178,6 @@ export default function Layout({ children }) {
       }}
     >
       <Box sx={{ p: 2 }}>
-        {/* Handle */}
         <Box
           sx={{
             width: 40,
@@ -183,7 +189,6 @@ export default function Layout({ children }) {
           }}
         />
 
-        {/* Profile row → opens business switcher */}
         <Stack
           direction="row"
           spacing={1.5}
@@ -215,7 +220,9 @@ export default function Layout({ children }) {
 
         <List>
           {allMenuItems
-            .filter((item) => item.path !== "/dashboard" && item.path !== "/items")
+            .filter(
+              (item) => item.path !== "/dashboard" && item.path !== "/items"
+            )
             .map((item) => (
               <ListItem key={item.text} disablePadding>
                 <ListItemButton onClick={() => goTo(item.path)}>
@@ -255,7 +262,6 @@ export default function Layout({ children }) {
     </Drawer>
   );
 
-  // Bottom nav active index
   const bottomNavValue = (() => {
     if (location.pathname.startsWith("/items")) return 1;
     if (
@@ -263,14 +269,19 @@ export default function Layout({ children }) {
       location.pathname.startsWith("/users") ||
       location.pathname.startsWith("/settings")
     ) {
-      return 2; // highlight More when on secondary pages
+      return 2;
     }
-    return 0; // Home / Dashboard
+    return 0;
   })();
+
+  // Mobile: show page title | Desktop: show business name
+  const appBarTitle = isMobile
+    ? getPageTitle(location.pathname)
+    : currentTenant?.name || "Dashboard";
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* AppBar */}
+      {/* AppBar – no hamburger on mobile */}
       <AppBar
         position="fixed"
         sx={{
@@ -279,25 +290,32 @@ export default function Layout({ children }) {
         }}
       >
         <Toolbar>
-          {/* Hamburger only on mobile if you still want drawer; optional */}
-          <IconButton
-            color="inherit"
-            edge="start"
-            onClick={handleDrawerToggle}
-            sx={{ mr: 1, display: { sm: "none" } }}
-          >
-            <MenuIcon />
-          </IconButton>
-
-          <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
-            {currentTenant?.name || "Dashboard"}
+          <Typography variant="h6" noWrap sx={{ flexGrow: 1, fontWeight: 600 }}>
+            {appBarTitle}
           </Typography>
 
-          {/* Avatar → business switcher */}
+          {/* Business name chip on mobile (optional hint) */}
+          {isMobile && currentTenant?.name && (
+            <Typography
+              variant="caption"
+              sx={{
+                mr: 1.5,
+                opacity: 0.9,
+                maxWidth: 100,
+                overflow: "hidden",
+                textOverflow: "ellipsis",
+                whiteSpace: "nowrap",
+              }}
+            >
+              {currentTenant.name}
+            </Typography>
+          )}
+
           <IconButton
             color="inherit"
             onClick={() => setSwitcherOpen(true)}
             sx={{ p: 0.5 }}
+            aria-label="Switch business"
           >
             <Avatar
               src={user?.avatar || undefined}
@@ -309,27 +327,11 @@ export default function Layout({ children }) {
         </Toolbar>
       </AppBar>
 
-      {/* Side nav (desktop + optional mobile drawer) */}
+      {/* Desktop side drawer only */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
-        <Drawer
-          variant="temporary"
-          open={mobileOpen}
-          onClose={handleDrawerToggle}
-          ModalProps={{ keepMounted: true }}
-          sx={{
-            display: { xs: "block", sm: "none" },
-            "& .MuiDrawer-paper": {
-              boxSizing: "border-box",
-              width: drawerWidth,
-            },
-          }}
-        >
-          {drawer}
-        </Drawer>
-
         <Drawer
           variant="permanent"
           open
@@ -352,14 +354,14 @@ export default function Layout({ children }) {
           flexGrow: 1,
           p: { xs: 2, sm: 3 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: { xs: 7, sm: 8 },
+          mt: { xs: 7, sm: 8 }, // 56px mobile AppBar, 64px desktop
           mb: isMobile ? "calc(56px + env(safe-area-inset-bottom))" : 0,
         }}
       >
         {children}
       </Box>
 
-      {/* Bottom Navigation – mobile only */}
+      {/* Bottom nav – mobile only */}
       {isMobile && (
         <Paper
           elevation={8}

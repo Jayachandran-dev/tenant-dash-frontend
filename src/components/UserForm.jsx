@@ -13,6 +13,8 @@ import {
   Box,
   Avatar,
   IconButton,
+  useTheme,
+  useMediaQuery
 } from "@mui/material";
 import PhotoCameraIcon from "@mui/icons-material/PhotoCamera";
 import { uploadImageToCloudinary } from "../utils/uploadImage";
@@ -32,6 +34,7 @@ export default function UserForm({
   initialData = {},
   loading = false,
 }) {
+  const theme = useTheme();
   const [name, setName] = useState("");
   const [countryCode, setCountryCode] = useState("+91");
   const [mobile, setMobile] = useState("");
@@ -40,6 +43,7 @@ export default function UserForm({
   const [preview, setPreview] = useState("");
   const [error, setError] = useState("");
   const [uploading, setUploading] = useState(false);
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const fileInputRef = useRef(null);
 
@@ -118,6 +122,7 @@ export default function UserForm({
       onClose={onClose}
       fullWidth
       maxWidth="xs"
+      fullScreen={isMobile}
       PaperProps={{ sx: { borderRadius: 1 } }}
     >
       <DialogTitle>{mode === "create" ? "Add User" : "Edit Profile"}</DialogTitle>

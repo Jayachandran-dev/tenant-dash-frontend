@@ -19,14 +19,14 @@ export default function PageHeader({ title, actions, tabs, tabValue, onTabChange
 
   return (
     <Box
+      // Sticky header box in CommonList
       sx={{
         position: "sticky",
-        top: isMobile ? 56 : 64,
+        top: { xs: 56, sm: 64 }, // mobile AppBar 56px, desktop 64px
         zIndex: 10,
         bgcolor: "background.default",
+        pb: 2,
         pt: 1,
-        pb: 1,
-        mb: 1,
       }}
     >
       <Stack
