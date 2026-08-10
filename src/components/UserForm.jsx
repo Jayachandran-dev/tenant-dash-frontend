@@ -113,7 +113,13 @@ export default function UserForm({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      fullWidth
+      maxWidth="xs"
+      PaperProps={{ sx: { borderRadius: 1 } }}
+    >
       <DialogTitle>{mode === "create" ? "Add User" : "Edit Profile"}</DialogTitle>
 
       <DialogContent>
@@ -141,8 +147,9 @@ export default function UserForm({
                 bottom: -4,
                 right: -4,
                 bgcolor: "background.paper",
-                border: "1px solid #ddd",
-                "&:hover": { bgcolor: "grey.100" },
+                border: "1px solid",
+                borderColor: "divider",
+                "&:hover": { bgcolor: "action.hover" },
               }}
               disabled={uploading || loading}
             >
@@ -223,11 +230,14 @@ export default function UserForm({
       </DialogContent>
 
       <DialogActions>
-        <Button onClick={onClose}>Cancel</Button>
+        <Button onClick={onClose} sx={{ borderRadius: 1 }}>
+          Cancel
+        </Button>
         <Button
           variant="contained"
           onClick={handleSubmit}
           disabled={loading || uploading}
+          sx={{ borderRadius: 1 }}
         >
           {loading ? "Saving..." : mode === "create" ? "Add User" : "Save Changes"}
         </Button>
