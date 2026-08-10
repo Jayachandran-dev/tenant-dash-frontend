@@ -11,6 +11,8 @@ import { ToastProvider } from "./context/ToastContext";
 import BusinessProfile from "./pages/BusinessProfile";
 import Settings from "./pages/Settings";
 import PageLoader from "./components/PageLoader";
+import Items from "./pages/Items";
+
 
 function AppRoutes() {
   const { user, loading } = useAuth();
@@ -90,6 +92,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <Settings />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/items"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Items />
             </Layout>
           </ProtectedRoute>
         }

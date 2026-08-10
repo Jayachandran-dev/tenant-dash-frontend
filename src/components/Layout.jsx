@@ -33,6 +33,7 @@ import usePermission from "../hooks/usePermission";
 import { useAppTheme } from "../theme/ThemeContext";
 import DarkModeIcon from "@mui/icons-material/DarkMode";
 import LightModeIcon from "@mui/icons-material/LightMode";
+import InventoryIcon from "@mui/icons-material/Inventory"; // or ListAlt
 
 const drawerWidth = 260;
 
@@ -57,6 +58,7 @@ export default function Layout({ children }) {
 
   const menuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
+    { text: "Items", icon: <InventoryIcon />, path: "/items" },
     { text: "Business Profile", icon: <BusinessIcon />, path: "/business-profile" },
     ...(canManageUsers
       ? [{ text: "Users", icon: <PeopleIcon />, path: "/users" }]
