@@ -1,16 +1,15 @@
 import { useState } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import {
-  Box,
   Button,
   TextField,
   Typography,
-  Paper,
   Alert,
   MenuItem,
   Stack,
 } from "@mui/material";
 import { useAuth } from "../context/AuthContext";
+import AuthLayout from "../components/AuthLayout";
 
 const countryCodes = [
   { code: "+91", label: "India (+91)" },
@@ -46,79 +45,69 @@ export default function Signup() {
   };
 
   return (
-    <Box
-      sx={{
-        minHeight: "100vh",
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        bgcolor: "#f5f5f5",
-      }}
-    >
-      <Paper elevation={3} sx={{ p: 4, width: 420 }}>
-        <Typography variant="h5" gutterBottom align="center" fontWeight={600}>
-          Create Your Business
-        </Typography>
+    <AuthLayout>
+      <Typography variant="h5" gutterBottom align="center" fontWeight={600}>
+        Create Your Business
+      </Typography>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
 
-        <form onSubmit={handleSubmit}>
+      <form onSubmit={handleSubmit}>
+        <TextField
+          fullWidth
+          label="Business Name"
+          value={tenantName}
+          onChange={(e) => setTenantName(e.target.value)}
+          margin="normal"
+          required
+        />
+
+        <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
+          <TextField
+            select
+            label="Code"
+            value={countryCode}
+            onChange={(e) => setCountryCode(e.target.value)}
+            sx={{ width: 140 }}
+          >
+            {countryCodes.map((option) => (
+              <MenuItem key={option.code} value={option.code}>
+                {option.label}
+              </MenuItem>
+            ))}
+          </TextField>
+
           <TextField
             fullWidth
-            label="Business Name"
-            value={tenantName}
-            onChange={(e) => setTenantName(e.target.value)}
-            margin="normal"
+            label="Mobile Number"
+            value={mobile}
+            onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
+            inputProps={{ maxLength: 10 }}
             required
           />
+        </Stack>
 
-          <Stack direction="row" spacing={1} sx={{ mt: 1 }}>
-            <TextField
-              select
-              label="Code"
-              value={countryCode}
-              onChange={(e) => setCountryCode(e.target.value)}
-              sx={{ width: 140 }}
-            >
-              {countryCodes.map((option) => (
-                <MenuItem key={option.code} value={option.code}>
-                  {option.label}
-                </MenuItem>
-              ))}
-            </TextField>
+        <Button
+          fullWidth
+          type="submit"
+          variant="contained"
+          sx={{ mt: 3, borderRadius: 1 }}
+          disabled={loading}
+        >
+          {loading ? "Creating..." : "Create Business"}
+        </Button>
+      </form>
 
-            <TextField
-              fullWidth
-              label="Mobile Number"
-              value={mobile}
-              onChange={(e) => setMobile(e.target.value.replace(/\D/g, ""))}
-              inputProps={{ maxLength: 10 }}
-              required
-            />
-          </Stack>
-
-          <Button
-            fullWidth
-            type="submit"
-            variant="contained"
-            sx={{ mt: 3 }}
-            disabled={loading}
-          >
-            {loading ? "Creating..." : "Create Business"}
-          </Button>
-        </form>
-
-        <Typography variant="body2" align="center" sx={{ mt: 2 }}>
-          Already have an account?{" "}
-          <Link to="/login" style={{ textDecoration: "none" }}>
-            Login with OTP
-          </Link>
-        </Typography>
-      </Paper>
-    </Box>
+      <Typography variant="body2" align="center" sx={{ mt: 2 }}>
+        Already have an account?{" "}
+        <Link to="/login" style={{ textDecoration: "none" }}>
+          Login with OTP
+        </Link>
+      </Typography>
+    </AuthLayout>
   );
 }
