@@ -9,7 +9,6 @@ import {
   TableContainer,
   TableHead,
   TableRow,
-  CircularProgress,
   Stack,
   Card,
   CardContent,
@@ -17,7 +16,6 @@ import {
   useTheme,
   Divider,
 } from "@mui/material";
-import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "./PageHeader";
 import ListSkeleton from "./ListSkeleton";
@@ -85,13 +83,6 @@ export default function CommonList({
     </Button>
   );
 
-  const EmptyState = (
-    <Box sx={{ py: 6, textAlign: "center" }}>
-      <InboxOutlinedIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
-      <Typography color="text.secondary">{emptyMessage}</Typography>
-    </Box>
-  );
-
   return (
     <Box>
       <PageHeader title={title} actions={headerActions} />
@@ -99,8 +90,8 @@ export default function CommonList({
       {/* ========== MOBILE VIEW (Cards) ========== */}
       {isMobile ? (
         rows.length === 0 ? (
-        <EmptyState
-            title={emptyTitle || "No data yet"}
+          <EmptyState
+            title={emptyTitle}
             description={emptyMessage}
             actionLabel={onAdd ? addButtonLabel : undefined}
             onAction={onAdd}
@@ -152,8 +143,13 @@ export default function CommonList({
             <TableBody>
               {rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} align="center" sx={{ border: 0 }}>
-                    {EmptyState}
+                  <TableCell colSpan={columns.length} align="center" sx={{ border: 0, py: 4 }}>
+                    <EmptyState
+                      title={emptyTitle}
+                      description={emptyMessage}
+                      actionLabel={onAdd ? addButtonLabel : undefined}
+                      onAction={onAdd}
+                    />
                   </TableCell>
                 </TableRow>
               ) : (
