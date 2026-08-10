@@ -26,6 +26,7 @@ import MenuIcon from "@mui/icons-material/Menu";
 import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
+import SettingsIcon from "@mui/icons-material/Settings";
 import { useAuth } from "../context/AuthContext";
 import BusinessSwitcher from "./BusinessSwitcher";
 import usePermission from "../hooks/usePermission";
@@ -60,6 +61,7 @@ export default function Layout({ children }) {
     ...(canManageUsers
       ? [{ text: "Users", icon: <PeopleIcon />, path: "/users" }]
       : []),
+    { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
   ];
   // ========== DRAWER CONTENT ==========
   const drawer = (

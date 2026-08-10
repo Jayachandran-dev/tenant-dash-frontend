@@ -76,7 +76,7 @@ export default function BusinessSwitcher({ open, onClose }) {
             sx={{
               width: 40,
               height: 5,
-              bgcolor: "grey.400",
+              bgcolor: "divider",
               borderRadius: 3,
               mx: "auto",
               mb: 2,
@@ -88,7 +88,7 @@ export default function BusinessSwitcher({ open, onClose }) {
             direction="row"
             spacing={2}
             alignItems="center"
-            sx={{ mb: 2, p: 1.5, bgcolor: "grey.50", borderRadius: 2 }}
+            sx={{ mb: 2, p: 1.5, bgcolor: "action.hover", borderRadius: 1 }}
           >
             <Avatar
               src={user?.avatar || undefined}
@@ -127,7 +127,7 @@ export default function BusinessSwitcher({ open, onClose }) {
                 selected={currentTenant?.id === tenant.id}
                 onClick={() => handleSelect(tenant)}
                 sx={{
-                  borderRadius: 2,
+                  borderRadius: 1,
                   mb: 1,
                   border: "1px solid",
                   borderColor:
@@ -151,7 +151,7 @@ export default function BusinessSwitcher({ open, onClose }) {
             color="error"
             startIcon={<LogoutIcon />}
             onClick={handleLogout}
-            sx={{ borderRadius: 2 }}
+            sx={{ borderRadius: 1 }}
           >
             Logout
           </Button>
