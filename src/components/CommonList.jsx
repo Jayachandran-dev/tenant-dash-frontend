@@ -17,16 +17,20 @@ import {
   useTheme,
   Divider,
 } from "@mui/material";
+import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
+import AddIcon from "@mui/icons-material/Add";
+import PageHeader from "./PageHeader";
 
 /**
  * Reusable responsive List component
  * - Desktop: Table
  * - Mobile: Card list
- * - Sticky header (Title + Add button)
+ * - Header uses the shared PageHeader (same sticky offset + right-aligned
+ *   actions as every other page — Business Profile, etc.)
  */
 export default function CommonList({
   title,
-  addButtonLabel = "+ Add",
+  addButtonLabel = "Add",
   onAdd,
   columns = [],
   rows = [],
@@ -45,46 +49,37 @@ export default function CommonList({
     );
   }
 
+  const headerActions = onAdd && (
+    <Button
+      variant="contained"
+      onClick={onAdd}
+      startIcon={<AddIcon />}
+      sx={{ borderRadius: 1 }}
+    >
+      {addButtonLabel}
+    </Button>
+  );
+
+  const EmptyState = (
+    <Box sx={{ py: 6, textAlign: "center" }}>
+      <InboxOutlinedIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
+      <Typography color="text.secondary">{emptyMessage}</Typography>
+    </Box>
+  );
+
   return (
     <Box>
-      {/* ========== STICKY HEADER ========== */}
-      <Box
-        sx={{
-          position: "sticky",
-          top: 57, // height of AppBar (adjust if needed)
-          zIndex: 10,
-          bgcolor: "background.default",
-          pb: 2,
-          pt: 1,
-        }}
-      >
-        <Stack
-          direction="row"
-          justifyContent="space-between"
-          alignItems="center"
-          sx={{ width: "100%" }}
-        >
-          <Typography variant="h5" fontWeight={600}>
-            {title}
-          </Typography>
-
-          {onAdd && (
-            <Button variant="contained" onClick={onAdd} sx={{ ml: "auto", borderRadius: 0.5 }}>
-              {addButtonLabel}
-            </Button>
-          )}
-        </Stack>
-      </Box>
+      <PageHeader title={title} actions={headerActions} />
 
       {/* ========== MOBILE VIEW (Cards) ========== */}
       {isMobile ? (
-        <Stack spacing={1.5}>
-          {rows.length === 0 ? (
-            <Paper sx={{ p: 4, textAlign: "center" }}>
-              <Typography color="text.secondary">{emptyMessage}</Typography>
-            </Paper>
-          ) : (
-            rows.map((row) => (
+        rows.length === 0 ? (
+          <Paper sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
+            {EmptyState}
+          </Paper>
+        ) : (
+          <Stack spacing={1.5}>
+            {rows.map((row) => (
               <Card key={getRowId(row)} variant="outlined" sx={{ borderRadius: 1 }}>
                 <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
                   {columns.map((col, index) => (
@@ -106,12 +101,15 @@ export default function CommonList({
                   ))}
                 </CardContent>
               </Card>
-            ))
-          )}
-        </Stack>
+            ))}
+          </Stack>
+        )
       ) : (
         /* ========== DESKTOP VIEW (Table) ========== */
-        <TableContainer component={Paper} sx={{ borderRadius: 2 }}>
+        <TableContainer
+          component={Paper}
+          sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}
+        >
           <Table stickyHeader>
             <TableHead>
               <TableRow>
@@ -126,8 +124,8 @@ export default function CommonList({
             <TableBody>
               {rows.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={columns.length} align="center">
-                    {emptyMessage}
+                  <TableCell colSpan={columns.length} align="center" sx={{ border: 0 }}>
+                    {EmptyState}
                   </TableCell>
                 </TableRow>
               ) : (

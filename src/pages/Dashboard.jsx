@@ -15,6 +15,7 @@ import {
 import PeopleIcon from "@mui/icons-material/People";
 import BusinessIcon from "@mui/icons-material/Business";
 import AssignmentIcon from "@mui/icons-material/Assignment";
+import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import api from "../api/axios";
@@ -108,6 +109,7 @@ export default function Dashboard() {
               size="small"
               sx={{
                 mt: 1,
+                borderRadius: 1,
                 bgcolor: "rgba(255,255,255,0.2)",
                 color: "white",
                 fontWeight: 500,
@@ -121,7 +123,10 @@ export default function Dashboard() {
       <Grid container spacing={2} sx={{ mb: 3 }}>
         {stats.map((stat) => (
           <Grid item xs={12} sm={4} key={stat.title}>
-            <Card sx={{ borderRadius: 1, height: "100%" }}>
+            <Card
+              variant="outlined"
+              sx={{ borderRadius: 1, height: "100%", boxShadow: "none" }}
+            >
               <CardContent>
                 <Stack direction="row" justifyContent="space-between" alignItems="center">
                   <Box>
@@ -143,7 +148,15 @@ export default function Dashboard() {
       </Grid>
 
       {/* Items Section */}
-      <Paper sx={{ p: 3, borderRadius: 1 }}>
+      <Paper
+        sx={{
+          p: 3,
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+        }}
+        elevation={0}
+      >
         <Typography variant="h6" fontWeight={600} gutterBottom>
           Recent Items
         </Typography>
@@ -157,7 +170,7 @@ export default function Dashboard() {
                 variant="outlined"
                 sx={{
                   p: 2,
-                  borderRadius: 2,
+                  borderRadius: 1,
                   display: "flex",
                   justifyContent: "space-between",
                   alignItems: "center",
@@ -171,7 +184,8 @@ export default function Dashboard() {
             ))}
           </Stack>
         ) : (
-          <Box sx={{ py: 4, textAlign: "center" }}>
+          <Box sx={{ py: 5, textAlign: "center" }}>
+            <InboxOutlinedIcon sx={{ fontSize: 40, color: "text.disabled", mb: 1 }} />
             <Typography color="text.secondary">
               No items found in this business yet.
             </Typography>

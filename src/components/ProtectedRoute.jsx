@@ -1,6 +1,7 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import usePermission from "../hooks/usePermission";
+import PageLoader from "./PageLoader";
 
 /**
  * ProtectedRoute
@@ -15,7 +16,7 @@ export default function ProtectedRoute({ children, roles = [] }) {
 
   // Still loading auth state
   if (loading) {
-    return <div>Loading...</div>;
+    return <PageLoader />;
   }
 
   // Not logged in → go to login

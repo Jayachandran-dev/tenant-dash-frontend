@@ -9,11 +9,13 @@ import Dashboard from "./pages/Dashboard";
 import Users from "./pages/Users";
 import { ToastProvider } from "./context/ToastContext";
 import BusinessProfile from "./pages/BusinessProfile";
+import Settings from "./pages/Settings";
+import PageLoader from "./components/PageLoader";
 
 function AppRoutes() {
   const { user, loading } = useAuth();
 
-  if (loading) return <div>Loading...</div>;
+  if (loading) return <PageLoader />;
 
   return (
     <Routes>
@@ -77,6 +79,17 @@ function AppRoutes() {
           <ProtectedRoute>
             <Layout>
               <BusinessProfile />
+            </Layout>
+          </ProtectedRoute>
+        }
+      />
+
+      <Route
+        path="/settings"
+        element={
+          <ProtectedRoute>
+            <Layout>
+              <Settings />
             </Layout>
           </ProtectedRoute>
         }

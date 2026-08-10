@@ -1,10 +1,15 @@
 import { useEffect, useState } from "react";
-import { Avatar, Stack, Typography } from "@mui/material";
+import { Avatar, Stack, Typography, Chip } from "@mui/material";
 import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import UserForm from "../components/UserForm";
 import usePermission from "../hooks/usePermission";
 import { useToast } from "../context/ToastContext";
+
+const ROLE_COLORS = {
+  owner: "primary",
+  employee: "default",
+};
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -79,7 +84,13 @@ export default function Users() {
       id: "role",
       label: "Role",
       render: (row) => (
-        <span style={{ textTransform: "capitalize" }}>{row.role}</span>
+        <Chip
+          label={row.role ? row.role.charAt(0).toUpperCase() + row.role.slice(1) : "—"}
+          size="small"
+          color={ROLE_COLORS[row.role] || "default"}
+          variant={row.role === "owner" ? "filled" : "outlined"}
+          sx={{ borderRadius: 1, fontWeight: 500 }}
+        />
       ),
     },
     {
@@ -93,7 +104,7 @@ export default function Users() {
     <>
       <CommonList
         title="Users"
-        addButtonLabel="+ Add User"
+        addButtonLabel="Add User"
         onAdd={canAddUser ? handleAddClick : undefined}  // ← only owner sees the button
         columns={columns}
         rows={users}
