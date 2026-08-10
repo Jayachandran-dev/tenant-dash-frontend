@@ -7,6 +7,8 @@ import {
   TextField,
   Button,
   Alert,
+  useMediaQuery,
+  useTheme
 } from "@mui/material";
 
 export default function ItemForm({
@@ -19,6 +21,8 @@ export default function ItemForm({
 }) {
   const [title, setTitle] = useState("");
   const [error, setError] = useState("");
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   useEffect(() => {
     if (open) {
@@ -36,7 +40,7 @@ export default function ItemForm({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs">
+    <Dialog open={open} onClose={onClose} fullWidth maxWidth="xs" fullScreen={isMobile}>
       <DialogTitle>{mode === "create" ? "Add Item" : "Edit Item"}</DialogTitle>
       <DialogContent>
         {error && (

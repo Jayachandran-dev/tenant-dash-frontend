@@ -1,6 +1,5 @@
 import { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
-import BusinessIcon from "@mui/icons-material/Business";
 import {
   Box,
   Drawer,
@@ -27,48 +26,71 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
+import BusinessIcon from "@mui/icons-material/Business";
+import InventoryIcon from "@mui/icons-material/Inventory";
+import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
+import DarkModeIcon from "@mui/icons-material/DarkMode";
+import LightModeIcon from "@mui/icons-material/LightMode";
 import { useAuth } from "../context/AuthContext";
 import BusinessSwitcher from "./BusinessSwitcher";
 import usePermission from "../hooks/usePermission";
 import { useAppTheme } from "../theme/ThemeContext";
-import DarkModeIcon from "@mui/icons-material/DarkMode";
-import LightModeIcon from "@mui/icons-material/LightMode";
-import InventoryIcon from "@mui/icons-material/Inventory"; // or ListAlt
 
 const drawerWidth = 260;
 
 export default function Layout({ children }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [switcherOpen, setSwitcherOpen] = useState(false);
+  const [moreOpen, setMoreOpen] = useState(false);
 
   const { user, currentTenant, logout } = useAuth();
   const { canManageUsers } = usePermission();
+  const { mode, toggleMode } = useAppTheme();
   const navigate = useNavigate();
   const location = useLocation();
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
   const handleDrawerToggle = () => setMobileOpen(!mobileOpen);
-  const { mode, toggleMode } = useAppTheme();
 
   const handleLogout = () => {
+    setMoreOpen(false);
     logout();
     navigate("/login");
   };
 
-  const menuItems = [
+  // Full menu (desktop drawer + More sheet)
+  const allMenuItems = [
     { text: "Dashboard", icon: <DashboardIcon />, path: "/dashboard" },
     { text: "Items", icon: <InventoryIcon />, path: "/items" },
-    { text: "Business Profile", icon: <BusinessIcon />, path: "/business-profile" },
+    {
+      text: "Business Profile",
+      icon: <BusinessIcon />,
+      path: "/business-profile",
+    },
     ...(canManageUsers
       ? [{ text: "Users", icon: <PeopleIcon />, path: "/users" }]
       : []),
     { text: "Settings", icon: <SettingsIcon />, path: "/settings" },
   ];
-  // ========== DRAWER CONTENT ==========
+
+  // Primary destinations only (mobile bottom nav)
+  const mobileNavItems = [
+    { text: "Home", icon: <DashboardIcon />, path: "/dashboard" },
+    { text: "Items", icon: <InventoryIcon />, path: "/items" },
+    { text: "More", icon: <MoreHorizIcon />, path: null }, // opens sheet
+  ];
+
+  const goTo = (path) => {
+    if (!path) return;
+    navigate(path);
+    setMobileOpen(false);
+    setMoreOpen(false);
+  };
+
+  // ========== DESKTOP DRAWER ==========
   const drawer = (
     <Box sx={{ display: "flex", flexDirection: "column", height: "100%" }}>
-      {/* User + Business Header (Clickable) */}
       <Box
         onClick={() => setSwitcherOpen(true)}
         sx={{
@@ -78,13 +100,9 @@ export default function Layout({ children }) {
         }}
       >
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar
-            src={user?.avatar || undefined}
-            sx={{ width: 48, height: 48 }}
-          >
+          <Avatar src={user?.avatar || undefined} sx={{ width: 48, height: 48 }}>
             {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
           </Avatar>
-
           <Box sx={{ overflow: "hidden" }}>
             <Typography fontWeight={600} noWrap>
               {user?.name || "User"}
@@ -98,16 +116,12 @@ export default function Layout({ children }) {
 
       <Divider />
 
-      {/* Navigation Links */}
       <List sx={{ flexGrow: 1 }}>
-        {menuItems.map((item) => (
+        {allMenuItems.map((item) => (
           <ListItem key={item.text} disablePadding>
             <ListItemButton
               selected={location.pathname === item.path}
-              onClick={() => {
-                navigate(item.path);
-                setMobileOpen(false);
-              }}
+              onClick={() => goTo(item.path)}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
@@ -124,13 +138,11 @@ export default function Layout({ children }) {
             <ListItemIcon>
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </ListItemIcon>
-            <ListItemText primary={mode === "light" ? "Dark Mode" : "Light Mode"} />
+            <ListItemText
+              primary={mode === "light" ? "Dark Mode" : "Light Mode"}
+            />
           </ListItemButton>
         </ListItem>
-      </List>
-      
-      {/* Logout */}
-      <List>
         <ListItem disablePadding>
           <ListItemButton onClick={handleLogout}>
             <ListItemIcon>
@@ -143,14 +155,122 @@ export default function Layout({ children }) {
     </Box>
   );
 
-  // ========== BOTTOM NAV (Mobile / PWA) ==========
-  const bottomNavValue = menuItems.findIndex(
-    (item) => item.path === location.pathname
+  // ========== MORE BOTTOM SHEET (mobile) ==========
+  const moreSheet = (
+    <Drawer
+      anchor="bottom"
+      open={moreOpen}
+      onClose={() => setMoreOpen(false)}
+      PaperProps={{
+        sx: {
+          borderTopLeftRadius: 16,
+          borderTopRightRadius: 16,
+          maxHeight: "75vh",
+          pb: "env(safe-area-inset-bottom)",
+        },
+      }}
+    >
+      <Box sx={{ p: 2 }}>
+        {/* Handle */}
+        <Box
+          sx={{
+            width: 40,
+            height: 5,
+            bgcolor: "grey.400",
+            borderRadius: 3,
+            mx: "auto",
+            mb: 2,
+          }}
+        />
+
+        {/* Profile row → opens business switcher */}
+        <Stack
+          direction="row"
+          spacing={1.5}
+          alignItems="center"
+          onClick={() => {
+            setMoreOpen(false);
+            setSwitcherOpen(true);
+          }}
+          sx={{
+            p: 1.5,
+            mb: 1,
+            borderRadius: 2,
+            bgcolor: "action.hover",
+            cursor: "pointer",
+          }}
+        >
+          <Avatar src={user?.avatar || undefined}>
+            {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+          </Avatar>
+          <Box sx={{ flexGrow: 1, overflow: "hidden" }}>
+            <Typography fontWeight={600} noWrap>
+              {user?.name || "User"}
+            </Typography>
+            <Typography variant="body2" color="text.secondary" noWrap>
+              {currentTenant?.name || "Select Business"}
+            </Typography>
+          </Box>
+        </Stack>
+
+        <List>
+          {allMenuItems
+            .filter((item) => item.path !== "/dashboard" && item.path !== "/items")
+            .map((item) => (
+              <ListItem key={item.text} disablePadding>
+                <ListItemButton onClick={() => goTo(item.path)}>
+                  <ListItemIcon>{item.icon}</ListItemIcon>
+                  <ListItemText primary={item.text} />
+                </ListItemButton>
+              </ListItem>
+            ))}
+        </List>
+
+        <Divider sx={{ my: 1 }} />
+
+        <List>
+          <ListItem disablePadding>
+            <ListItemButton onClick={toggleMode}>
+              <ListItemIcon>
+                {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
+              </ListItemIcon>
+              <ListItemText
+                primary={mode === "light" ? "Dark Mode" : "Light Mode"}
+              />
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton onClick={handleLogout}>
+              <ListItemIcon>
+                <LogoutIcon color="error" />
+              </ListItemIcon>
+              <ListItemText
+                primary="Logout"
+                primaryTypographyProps={{ color: "error" }}
+              />
+            </ListItemButton>
+          </ListItem>
+        </List>
+      </Box>
+    </Drawer>
   );
+
+  // Bottom nav active index
+  const bottomNavValue = (() => {
+    if (location.pathname.startsWith("/items")) return 1;
+    if (
+      location.pathname.startsWith("/business-profile") ||
+      location.pathname.startsWith("/users") ||
+      location.pathname.startsWith("/settings")
+    ) {
+      return 2; // highlight More when on secondary pages
+    }
+    return 0; // Home / Dashboard
+  })();
 
   return (
     <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Top AppBar - Clean */}
+      {/* AppBar */}
       <AppBar
         position="fixed"
         sx={{
@@ -159,11 +279,12 @@ export default function Layout({ children }) {
         }}
       >
         <Toolbar>
+          {/* Hamburger only on mobile if you still want drawer; optional */}
           <IconButton
             color="inherit"
             edge="start"
             onClick={handleDrawerToggle}
-            sx={{ mr: 2, display: { sm: "none" } }}
+            sx={{ mr: 1, display: { sm: "none" } }}
           >
             <MenuIcon />
           </IconButton>
@@ -171,15 +292,28 @@ export default function Layout({ children }) {
           <Typography variant="h6" noWrap sx={{ flexGrow: 1 }}>
             {currentTenant?.name || "Dashboard"}
           </Typography>
+
+          {/* Avatar → business switcher */}
+          <IconButton
+            color="inherit"
+            onClick={() => setSwitcherOpen(true)}
+            sx={{ p: 0.5 }}
+          >
+            <Avatar
+              src={user?.avatar || undefined}
+              sx={{ width: 36, height: 36 }}
+            >
+              {user?.name ? user.name.charAt(0).toUpperCase() : "U"}
+            </Avatar>
+          </IconButton>
         </Toolbar>
       </AppBar>
 
-      {/* Side Navigation */}
+      {/* Side nav (desktop + optional mobile drawer) */}
       <Box
         component="nav"
         sx={{ width: { sm: drawerWidth }, flexShrink: { sm: 0 } }}
       >
-        {/* Mobile Drawer */}
         <Drawer
           variant="temporary"
           open={mobileOpen}
@@ -196,7 +330,6 @@ export default function Layout({ children }) {
           {drawer}
         </Drawer>
 
-        {/* Desktop Drawer */}
         <Drawer
           variant="permanent"
           open
@@ -212,40 +345,46 @@ export default function Layout({ children }) {
         </Drawer>
       </Box>
 
-      {/* Main Content */}
+      {/* Main content */}
       <Box
         component="main"
         sx={{
           flexGrow: 1,
-          p: 3,
+          p: { xs: 2, sm: 3 },
           width: { sm: `calc(100% - ${drawerWidth}px)` },
-          mt: isMobile ? 7 : 8, // matches actual AppBar height: 56px mobile / 64px desktop
-          mb: isMobile ? 8 : 0, // space for bottom nav
+          mt: { xs: 7, sm: 8 },
+          mb: isMobile ? "calc(56px + env(safe-area-inset-bottom))" : 0,
         }}
       >
         {children}
       </Box>
 
-      {/* Bottom Navigation - Only on Mobile */}
+      {/* Bottom Navigation – mobile only */}
       {isMobile && (
         <Paper
+          elevation={8}
           sx={{
             position: "fixed",
             bottom: 0,
             left: 0,
             right: 0,
             zIndex: 1200,
+            pb: "env(safe-area-inset-bottom)",
           }}
-          elevation={8}
         >
           <BottomNavigation
             showLabels
-            value={bottomNavValue === -1 ? 0 : bottomNavValue}
+            value={bottomNavValue}
             onChange={(e, newValue) => {
-              navigate(menuItems[newValue].path);
+              const item = mobileNavItems[newValue];
+              if (item.path === null) {
+                setMoreOpen(true);
+              } else {
+                goTo(item.path);
+              }
             }}
           >
-            {menuItems.map((item) => (
+            {mobileNavItems.map((item) => (
               <BottomNavigationAction
                 key={item.text}
                 label={item.text}
@@ -256,7 +395,8 @@ export default function Layout({ children }) {
         </Paper>
       )}
 
-      {/* Business Switcher Bottom Sheet */}
+      {moreSheet}
+
       <BusinessSwitcher
         open={switcherOpen}
         onClose={() => setSwitcherOpen(false)}
