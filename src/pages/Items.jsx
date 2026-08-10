@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { IconButton, Stack, Typography } from "@mui/material";
+import { IconButton, Stack, Typography, Box, CircularProgress } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../api/axios";
@@ -7,6 +7,8 @@ import CommonList from "../components/CommonList";
 import ItemForm from "../components/ItemForm";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
+import { useCallback } from "react";
+import usePullToRefresh from "../hooks/usePullToRefresh";
 
 export default function Items() {
   const [items, setItems] = useState([]);
@@ -19,7 +21,7 @@ export default function Items() {
   const { showToast } = useToast();
   const { currentTenant } = useAuth();
 
-  const fetchItems = async () => {
+  const fetchItems = useCallback(async () => {
     try {
       setLoading(true);
       const res = await api.get("/items");
@@ -29,11 +31,15 @@ export default function Items() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     fetchItems();
-  }, [currentTenant?.id]);
+  }, [currentTenant?.id, fetchItems]);
+
+  const { pulling, refreshing } = usePullToRefresh(fetchItems, {
+    enabled: true, // or only on mobile
+  });
 
   const handleAdd = () => {
     setFormMode("create");
@@ -111,14 +117,24 @@ export default function Items() {
 
   return (
     <>
+      {(pulling || refreshing) && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+          <CircularProgress size={22} />
+          <Typography variant="caption" sx={{ ml: 1 }}>
+            {refreshing ? "Refreshing..." : "Release to refresh"}
+          </Typography>
+        </Box>
+      )}
+
       <CommonList
         title="Items"
         addButtonLabel="+ Add Item"
         onAdd={handleAdd}
         columns={columns}
         rows={items}
-        loading={loading}
-        emptyMessage="No items yet. Add your first item."
+        loading={loading && !refreshing}
+        emptyTitle="No items yet"
+        emptyMessage="Add your first item to get started."
         getRowId={(row) => row.id}
       />
 

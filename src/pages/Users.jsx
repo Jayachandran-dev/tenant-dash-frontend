@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
-import { Avatar, Stack, Typography, Chip } from "@mui/material";
+import { Avatar, Stack, Typography, Chip, Box, CircularProgress  } from "@mui/material";
 import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import UserForm from "../components/UserForm";
 import usePermission from "../hooks/usePermission";
 import { useToast } from "../context/ToastContext";
+import { useCallback } from "react";
+import usePullToRefresh from "../hooks/usePullToRefresh";
 
 const ROLE_COLORS = {
   owner: "primary",
@@ -23,7 +25,7 @@ export default function Users() {
 
   const { canAddUser } = usePermission();
 
-  const fetchUsers = async () => {
+  const fetchUsers = useCallback(async () => {
     try {
       const res = await api.get("/users");
       setUsers(res.data);
@@ -32,11 +34,15 @@ export default function Users() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [showToast]);
 
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [fetchUsers]);
+
+  const { pulling, refreshing } = usePullToRefresh(fetchUsers, {
+    enabled: true, // or only on mobile
+  });
 
   const handleAddClick = () => {
     setFormMode("create");
@@ -102,6 +108,15 @@ export default function Users() {
 
   return (
     <>
+      {(pulling || refreshing) && (
+        <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
+          <CircularProgress size={22} />
+          <Typography variant="caption" sx={{ ml: 1 }}>
+            {refreshing ? "Refreshing..." : "Release to refresh"}
+          </Typography>
+        </Box>
+      )}
+
       <CommonList
         title="Users"
         addButtonLabel="Add User"

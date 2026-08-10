@@ -20,6 +20,8 @@ import {
 import InboxOutlinedIcon from "@mui/icons-material/InboxOutlined";
 import AddIcon from "@mui/icons-material/Add";
 import PageHeader from "./PageHeader";
+import ListSkeleton from "./ListSkeleton";
+import EmptyState from "./EmptyState";
 
 /**
  * Reusable responsive List component
@@ -36,6 +38,7 @@ export default function CommonList({
   rows = [],
   loading = false,
   emptyMessage = "No data found",
+  emptyTitle = "Nothing here yet",
   getRowId = (row) => row.id,
 }) {
   const theme = useTheme();
@@ -43,10 +46,32 @@ export default function CommonList({
 
   if (loading) {
     return (
-      <Box sx={{ display: "flex", justifyContent: "center", mt: 6 }}>
-        <CircularProgress />
-      </Box>
-    );
+        <Box>
+          {/* keep sticky header if you want title visible while loading */}
+          <Box
+            sx={{
+              position: "sticky",
+              top: { xs: 56, sm: 64 },
+              zIndex: 10,
+              bgcolor: "background.default",
+              pb: 2,
+              pt: 1,
+            }}
+          >
+            <Stack direction="row" justifyContent="space-between" alignItems="center">
+              <Typography variant="h5" fontWeight={600}>
+                {title}
+              </Typography>
+              {onAdd && (
+                <Button variant="contained" onClick={onAdd} disabled>
+                  {addButtonLabel}
+                </Button>
+              )}
+            </Stack>
+          </Box>
+          <ListSkeleton rows={6} />
+        </Box>
+      );
   }
 
   const headerActions = onAdd && (
@@ -74,9 +99,12 @@ export default function CommonList({
       {/* ========== MOBILE VIEW (Cards) ========== */}
       {isMobile ? (
         rows.length === 0 ? (
-          <Paper sx={{ borderRadius: 1, border: "1px solid", borderColor: "divider" }}>
-            {EmptyState}
-          </Paper>
+        <EmptyState
+            title={emptyTitle || "No data yet"}
+            description={emptyMessage}
+            actionLabel={onAdd ? addButtonLabel : undefined}
+            onAction={onAdd}
+          />
         ) : (
           <Stack spacing={1.5}>
             {rows.map((row) => (
