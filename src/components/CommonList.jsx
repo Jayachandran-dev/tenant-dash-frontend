@@ -37,6 +37,7 @@ export default function CommonList({
   loading = false,
   emptyMessage = "No data found",
   emptyTitle = "Nothing here yet",
+  emptyIcon,
   getRowId = (row) => row.id,
 }) {
   const theme = useTheme();
@@ -93,6 +94,7 @@ export default function CommonList({
           <EmptyState
             title={emptyTitle}
             description={emptyMessage}
+            icon={emptyIcon}
             actionLabel={onAdd ? addButtonLabel : undefined}
             onAction={onAdd}
           />
@@ -147,6 +149,7 @@ export default function CommonList({
                     <EmptyState
                       title={emptyTitle}
                       description={emptyMessage}
+                      icon={emptyIcon}
                       actionLabel={onAdd ? addButtonLabel : undefined}
                       onAction={onAdd}
                     />

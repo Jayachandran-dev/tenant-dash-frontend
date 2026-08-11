@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { IconButton, Stack, Typography, Box, CircularProgress } from "@mui/material";
 import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
+import Inventory2OutlinedIcon from "@mui/icons-material/Inventory2Outlined";
 import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import ItemForm from "../components/ItemForm";
@@ -135,6 +136,7 @@ export default function Items() {
         loading={loading && !refreshing}
         emptyTitle="No items yet"
         emptyMessage="Add your first item to get started."
+        emptyIcon={<Inventory2OutlinedIcon />}
         getRowId={(row) => row.id}
       />
 

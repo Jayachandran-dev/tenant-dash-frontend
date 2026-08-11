@@ -1,4 +1,4 @@
-import { Box, Typography, Button, Paper } from "@mui/material";
+import { Box, Typography, Button, Paper, Avatar, alpha, useTheme } from "@mui/material";
 import InboxIcon from "@mui/icons-material/Inbox";
 
 export default function EmptyState({
@@ -8,6 +8,8 @@ export default function EmptyState({
   onAction,
   icon,
 }) {
+  const theme = useTheme();
+
   return (
     <Paper
       variant="outlined"
@@ -18,9 +20,18 @@ export default function EmptyState({
         borderStyle: "dashed",
       }}
     >
-      <Box sx={{ color: "text.secondary", mb: 1 }}>
-        {icon || <InboxIcon sx={{ fontSize: 48, opacity: 0.5 }} />}
-      </Box>
+      <Avatar
+        sx={{
+          width: 56,
+          height: 56,
+          mx: "auto",
+          mb: 1.5,
+          bgcolor: alpha(theme.palette.primary.main, 0.12),
+          color: "primary.main",
+        }}
+      >
+        {icon || <InboxIcon />}
+      </Avatar>
       <Typography variant="h6" fontWeight={600} gutterBottom>
         {title}
       </Typography>
@@ -28,7 +39,7 @@ export default function EmptyState({
         {description}
       </Typography>
       {actionLabel && onAction && (
-        <Button variant="contained" onClick={onAction}>
+        <Button variant="contained" onClick={onAction} sx={{ borderRadius: 1 }}>
           {actionLabel}
         </Button>
       )}

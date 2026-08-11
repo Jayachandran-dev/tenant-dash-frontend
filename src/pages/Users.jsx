@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Avatar, Stack, Typography, Chip, Box, CircularProgress  } from "@mui/material";
+import { Avatar, Stack, Typography, Chip, Box, CircularProgress, alpha, useTheme } from "@mui/material";
 import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import UserForm from "../components/UserForm";
@@ -14,6 +14,7 @@ const ROLE_COLORS = {
 };
 
 export default function Users() {
+  const theme = useTheme();
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [formOpen, setFormOpen] = useState(false);
@@ -72,7 +73,16 @@ export default function Users() {
       label: "User",
       render: (row) => (
         <Stack direction="row" spacing={1.5} alignItems="center">
-          <Avatar src={row.avatar || undefined} sx={{ width: 36, height: 36 }}>
+          <Avatar
+            src={row.avatar || undefined}
+            sx={{
+              width: 36,
+              height: 36,
+              bgcolor: alpha(theme.palette.primary.main, 0.15),
+              color: "primary.main",
+              fontWeight: 500,
+            }}
+          >
             {row.name ? row.name.charAt(0).toUpperCase() : "U"}
           </Avatar>
           <div>
