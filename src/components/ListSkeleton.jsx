@@ -8,7 +8,7 @@ export default function ListSkeleton({ rows = 5 }) {
     return (
       <Stack spacing={1.5}>
         {Array.from({ length: rows }).map((_, i) => (
-          <Paper key={i} variant="outlined" sx={{ p: 2, borderRadius: 2 }}>
+          <Paper key={i} variant="outlined" sx={{ p: 2, borderRadius: 1 }}>
             <Skeleton width="60%" height={22} />
             <Skeleton width="40%" height={18} sx={{ mt: 1 }} />
           </Paper>
@@ -18,7 +18,7 @@ export default function ListSkeleton({ rows = 5 }) {
   }
 
   return (
-    <Paper sx={{ borderRadius: 2, overflow: "hidden" }}>
+    <Paper sx={{ borderRadius: 1, overflow: "hidden" }}>
       <Box sx={{ p: 2 }}>
         {Array.from({ length: rows }).map((_, i) => (
           <Stack

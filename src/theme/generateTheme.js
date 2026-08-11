@@ -1,6 +1,6 @@
 import { createTheme, alpha } from "@mui/material/styles";
 
-export function generateTheme(primaryColor = "#0D9488", mode = "light") {
+export function generateTheme(primaryColor = "#8B5CF6", mode = "light") {
   return createTheme({
     cssVariables: true,
     palette: {
@@ -12,17 +12,17 @@ export function generateTheme(primaryColor = "#0D9488", mode = "light") {
         contrastText: "#FFFFFF",
       },
       background: {
-        default: mode === "light" ? "#F8FAFC" : "#0F172A",
-        paper: mode === "light" ? "#FFFFFF" : "#1E293B",
+        default: mode === "light" ? "#F8FAFC" : "#0F0F12",
+        paper: mode === "light" ? "#FFFFFF" : "#18181C",
       },
       text: {
-        primary: mode === "light" ? "#0F172A" : "#F1F5F9",
-        secondary: mode === "light" ? "#64748B" : "#94A3B8",
+        primary: mode === "light" ? "#0F172A" : "#FFFFFF",
+        secondary: mode === "light" ? "#64748B" : "#A1A1AA",
       },
-      divider: mode === "light" ? "#E2E8F0" : "#334155",
+      divider: mode === "light" ? "#E2E8F0" : "#2A2A2E",
       success: { main: "#10B981" },
       warning: { main: "#F59E0B" },
-      error: { main: "#EF4444" },
+      error: { main: mode === "light" ? "#EF4444" : "#F43F5E" },
     },
     typography: {
       fontFamily: [

@@ -8,6 +8,7 @@ import {
   List,
   Typography,
   Divider,
+  Switch,
   IconButton,
   ListItem,
   ListItemButton,
@@ -25,6 +26,7 @@ import DashboardIcon from "@mui/icons-material/Dashboard";
 import PeopleIcon from "@mui/icons-material/People";
 import LogoutIcon from "@mui/icons-material/Logout";
 import SettingsIcon from "@mui/icons-material/Settings";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutlineOutlined";
 import BusinessIcon from "@mui/icons-material/Business";
 import InventoryIcon from "@mui/icons-material/Inventory";
 import MoreHorizIcon from "@mui/icons-material/MoreHoriz";
@@ -123,12 +125,21 @@ export default function Layout({ children }) {
 
       <Divider />
 
+      <Typography
+        variant="overline"
+        color="text.secondary"
+        sx={{ px: 2.5, pt: 2, pb: 0.5, display: "block", fontWeight: 600, letterSpacing: 1 }}
+      >
+        Main
+      </Typography>
+
       <List sx={{ flexGrow: 1 }}>
         {allMenuItems.map((item) => (
-          <ListItem key={item.text} disablePadding>
+          <ListItem key={item.text} disablePadding sx={{ px: 1 }}>
             <ListItemButton
               selected={location.pathname === item.path}
               onClick={() => goTo(item.path)}
+              sx={{ borderRadius: 1 }}
             >
               <ListItemIcon>{item.icon}</ListItemIcon>
               <ListItemText primary={item.text} />
@@ -139,26 +150,59 @@ export default function Layout({ children }) {
 
       <Divider />
 
+      <Typography
+        variant="overline"
+        color="text.secondary"
+        sx={{ px: 2.5, pt: 2, pb: 0.5, display: "block", fontWeight: 600, letterSpacing: 1 }}
+      >
+        Appearance
+      </Typography>
+
       <List>
-        <ListItem disablePadding>
-          <ListItemButton onClick={toggleMode}>
+        <ListItem disablePadding sx={{ px: 1 }}>
+          <ListItemButton onClick={toggleMode} sx={{ borderRadius: 1 }}>
             <ListItemIcon>
               {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
             </ListItemIcon>
-            <ListItemText
-              primary={mode === "light" ? "Dark Mode" : "Light Mode"}
+            <ListItemText primary="Dark Mode" />
+            <Switch
+              checked={mode === "dark"}
+              onChange={toggleMode}
+              onClick={(e) => e.stopPropagation()}
+              size="small"
             />
           </ListItemButton>
         </ListItem>
+      </List>
+
+      <Divider />
+
+      <List sx={{ px: 1 }}>
         <ListItem disablePadding>
-          <ListItemButton onClick={handleLogout}>
+          <ListItemButton onClick={handleLogout} sx={{ borderRadius: 1 }}>
             <ListItemIcon>
-              <LogoutIcon />
+              <LogoutIcon color="error" />
             </ListItemIcon>
-            <ListItemText primary="Logout" />
+            <ListItemText primary="Logout" primaryTypographyProps={{ color: "error" }} />
           </ListItemButton>
         </ListItem>
       </List>
+
+      <Box sx={{ px: 2.5, py: 1.5 }}>
+        <Stack
+          direction="row"
+          spacing={1}
+          alignItems="center"
+          sx={{ cursor: "pointer", color: "text.secondary", mb: 1 }}
+          onClick={() => window.open("mailto:support@example.com")}
+        >
+          <HelpOutlineIcon fontSize="small" />
+          <Typography variant="body2">Help &amp; Support</Typography>
+        </Stack>
+        <Typography variant="caption" color="text.disabled">
+          v1.0.0
+        </Typography>
+      </Box>
     </Box>
   );
 
@@ -182,7 +226,7 @@ export default function Layout({ children }) {
           sx={{
             width: 40,
             height: 5,
-            bgcolor: "divider",
+            bgcolor: "grey.400",
             borderRadius: 3,
             mx: "auto",
             mb: 2,
@@ -200,7 +244,7 @@ export default function Layout({ children }) {
           sx={{
             p: 1.5,
             mb: 1,
-            borderRadius: 1,
+            borderRadius: 2,
             bgcolor: "action.hover",
             cursor: "pointer",
           }}
@@ -218,6 +262,14 @@ export default function Layout({ children }) {
           </Box>
         </Stack>
 
+        <Typography
+          variant="overline"
+          color="text.secondary"
+          sx={{ pl: 1, pb: 0.5, display: "block", fontWeight: 600, letterSpacing: 1 }}
+        >
+          Main
+        </Typography>
+
         <List>
           {allMenuItems
             .filter(
@@ -225,7 +277,7 @@ export default function Layout({ children }) {
             )
             .map((item) => (
               <ListItem key={item.text} disablePadding>
-                <ListItemButton onClick={() => goTo(item.path)}>
+                <ListItemButton onClick={() => goTo(item.path)} sx={{ borderRadius: 1 }}>
                   <ListItemIcon>{item.icon}</ListItemIcon>
                   <ListItemText primary={item.text} />
                 </ListItemButton>
@@ -235,19 +287,36 @@ export default function Layout({ children }) {
 
         <Divider sx={{ my: 1 }} />
 
+        <Typography
+          variant="overline"
+          color="text.secondary"
+          sx={{ pl: 1, pb: 0.5, display: "block", fontWeight: 600, letterSpacing: 1 }}
+        >
+          Appearance
+        </Typography>
+
         <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={toggleMode}>
+            <ListItemButton onClick={toggleMode} sx={{ borderRadius: 1 }}>
               <ListItemIcon>
                 {mode === "light" ? <DarkModeIcon /> : <LightModeIcon />}
               </ListItemIcon>
-              <ListItemText
-                primary={mode === "light" ? "Dark Mode" : "Light Mode"}
+              <ListItemText primary="Dark Mode" />
+              <Switch
+                checked={mode === "dark"}
+                onChange={toggleMode}
+                onClick={(e) => e.stopPropagation()}
+                size="small"
               />
             </ListItemButton>
           </ListItem>
+        </List>
+
+        <Divider sx={{ my: 1 }} />
+
+        <List>
           <ListItem disablePadding>
-            <ListItemButton onClick={handleLogout}>
+            <ListItemButton onClick={handleLogout} sx={{ borderRadius: 1 }}>
               <ListItemIcon>
                 <LogoutIcon color="error" />
               </ListItemIcon>
@@ -258,6 +327,22 @@ export default function Layout({ children }) {
             </ListItemButton>
           </ListItem>
         </List>
+
+        <Box sx={{ px: 1, pt: 1.5 }}>
+          <Stack
+            direction="row"
+            spacing={1}
+            alignItems="center"
+            sx={{ cursor: "pointer", color: "text.secondary", mb: 1 }}
+            onClick={() => window.open("mailto:support@example.com")}
+          >
+            <HelpOutlineIcon fontSize="small" />
+            <Typography variant="body2">Help &amp; Support</Typography>
+          </Stack>
+          <Typography variant="caption" color="text.disabled">
+            v1.0.0
+          </Typography>
+        </Box>
       </Box>
     </Drawer>
   );

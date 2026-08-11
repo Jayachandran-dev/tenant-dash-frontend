@@ -23,7 +23,7 @@ export function AppThemeProvider({ children }) {
     }
   }, [currentTenant?.themeMode]);
 
-  const primaryColor = currentTenant?.themeColor || "#0D9488";
+  const primaryColor = currentTenant?.themeColor || "#8B5CF6";
 
     const theme = useMemo(() => {
       return generateTheme(primaryColor, mode);

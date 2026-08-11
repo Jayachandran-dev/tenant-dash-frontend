@@ -14,7 +14,7 @@ export default function EmptyState({
       sx={{
         p: 4,
         textAlign: "center",
-        borderRadius: 3,
+        borderRadius: 1,
         borderStyle: "dashed",
       }}
     >

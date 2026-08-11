@@ -64,7 +64,7 @@ export default function BusinessProfile() {
     description: "",
     logo: "",
     visitingCard: "",
-    themeColor: "#0D9488",
+    themeColor: "#8B5CF6",
     themeMode: "light",
   });
 
@@ -82,7 +82,7 @@ export default function BusinessProfile() {
         description: res.data.description || "",
         logo: res.data.logo || "",
         visitingCard: res.data.visitingCard || "",
-        themeColor: res.data.themeColor || "#0D9488",
+        themeColor: res.data.themeColor || "#8B5CF6",
       });
     } catch (err) {
       showToast(err.response?.data?.message || "Failed to load profile", "error");
@@ -110,7 +110,7 @@ export default function BusinessProfile() {
           description: updated.description || "",
           logo: updated.logo || "",
           visitingCard: updated.visitingCard || "",
-          themeColor: updated.themeColor || "#0D9488",
+          themeColor: updated.themeColor || "#8B5CF6",
           themeMode: updated.themeMode || "light",
         }));
       }
@@ -184,7 +184,7 @@ export default function BusinessProfile() {
       description: profile?.description || "",
       logo: profile?.logo || "",
       visitingCard: profile?.visitingCard || "",
-      themeColor: profile?.themeColor || "#0D9488",
+      themeColor: profile?.themeColor || "#8B5CF6",
     });
     setEditing(false);
   };
