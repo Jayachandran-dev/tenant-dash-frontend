@@ -226,7 +226,7 @@ export default function Layout({ children }) {
           sx={{
             width: 40,
             height: 5,
-            bgcolor: "grey.400",
+            bgcolor: "divider",
             borderRadius: 3,
             mx: "auto",
             mb: 2,
@@ -244,7 +244,7 @@ export default function Layout({ children }) {
           sx={{
             p: 1.5,
             mb: 1,
-            borderRadius: 2,
+            borderRadius: 1,
             bgcolor: "action.hover",
             cursor: "pointer",
           }}
