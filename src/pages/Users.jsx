@@ -1,11 +1,23 @@
-import { useEffect, useState } from "react";
-import { Avatar, Stack, Typography, Chip, Box, CircularProgress, alpha, useTheme } from "@mui/material";
+import { useEffect, useState, useCallback } from "react";
+import {
+  Avatar,
+  Stack,
+  Typography,
+  Chip,
+  Box,
+  CircularProgress,
+  IconButton,
+  alpha,
+  useTheme,
+} from "@mui/material";
+import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import UserForm from "../components/UserForm";
+import ConfirmDialog from "../components/ConfirmDialog";
 import usePermission from "../hooks/usePermission";
 import { useToast } from "../context/ToastContext";
-import { useCallback } from "react";
+import { useAuth } from "../context/AuthContext";
 import usePullToRefresh from "../hooks/usePullToRefresh";
 
 const ROLE_COLORS = {
@@ -22,16 +34,21 @@ export default function Users() {
   const [selectedUser, setSelectedUser] = useState(null);
   const [saving, setSaving] = useState(false);
 
-  const { showToast } = useToast();
+  const [deleteOpen, setDeleteOpen] = useState(false);
+  const [userToRemove, setUserToRemove] = useState(null);
+  const [removing, setRemoving] = useState(false);
 
-  const { canAddUser } = usePermission();
+  const { showToast } = useToast();
+  const { user: currentUser } = useAuth();
+  const { canAddUser, isOwner } = usePermission();
 
   const fetchUsers = useCallback(async () => {
     try {
+      setLoading(true);
       const res = await api.get("/users");
       setUsers(res.data);
     } catch (err) {
-      console.error(err);
+      showToast(err.response?.data?.message || "Failed to load users", "error");
     } finally {
       setLoading(false);
     }
@@ -42,7 +59,7 @@ export default function Users() {
   }, [fetchUsers]);
 
   const { pulling, refreshing } = usePullToRefresh(fetchUsers, {
-    enabled: true, // or only on mobile
+    enabled: true,
   });
 
   const handleAddClick = () => {
@@ -64,6 +81,28 @@ export default function Users() {
       showToast(err.response?.data?.message || "Something went wrong", "error");
     } finally {
       setSaving(false);
+    }
+  };
+
+  const handleRemoveClick = (row) => {
+    setUserToRemove(row);
+    setDeleteOpen(true);
+  };
+
+  const handleRemoveConfirm = async () => {
+    if (!userToRemove) return;
+
+    setRemoving(true);
+    try {
+      await api.delete(`/users/${userToRemove.membershipId}`);
+      showToast("Member removed", "success");
+      setDeleteOpen(false);
+      setUserToRemove(null);
+      fetchUsers();
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to remove member", "error");
+    } finally {
+      setRemoving(false);
     }
   };
 
@@ -101,7 +140,11 @@ export default function Users() {
       label: "Role",
       render: (row) => (
         <Chip
-          label={row.role ? row.role.charAt(0).toUpperCase() + row.role.slice(1) : "—"}
+          label={
+            row.role
+              ? row.role.charAt(0).toUpperCase() + row.role.slice(1)
+              : "—"
+          }
           size="small"
           color={ROLE_COLORS[row.role] || "default"}
           variant={row.role === "owner" ? "filled" : "outlined"}
@@ -114,6 +157,29 @@ export default function Users() {
       label: "Joined At",
       render: (row) => new Date(row.joinedAt).toLocaleDateString(),
     },
+    ...(isOwner
+      ? [
+          {
+            id: "actions",
+            label: "Actions",
+            render: (row) => {
+              const isSelf = row.id === currentUser?.id;
+              if (isSelf) return null;
+
+              return (
+                <IconButton
+                  size="small"
+                  color="error"
+                  onClick={() => handleRemoveClick(row)}
+                  aria-label="Remove member"
+                >
+                  <DeleteIcon fontSize="small" />
+                </IconButton>
+              );
+            },
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -130,10 +196,10 @@ export default function Users() {
       <CommonList
         title="Users"
         addButtonLabel="Add User"
-        onAdd={canAddUser ? handleAddClick : undefined}  // ← only owner sees the button
+        onAdd={canAddUser ? handleAddClick : undefined}
         columns={columns}
         rows={users}
-        loading={loading}
+        loading={loading && !refreshing}
         emptyMessage="No users found"
         getRowId={(row) => row.membershipId}
       />
@@ -145,6 +211,25 @@ export default function Users() {
         mode={formMode}
         initialData={selectedUser || {}}
         loading={saving}
+      />
+
+      <ConfirmDialog
+        open={deleteOpen}
+        onClose={() => {
+          if (!removing) {
+            setDeleteOpen(false);
+            setUserToRemove(null);
+          }
+        }}
+        onConfirm={handleRemoveConfirm}
+        title="Remove member?"
+        message={
+          userToRemove
+            ? `Remove ${userToRemove.name || userToRemove.mobile} from this business? They will lose access until added again.`
+            : "Are you sure?"
+        }
+        confirmLabel="Remove"
+        loading={removing}
       />
     </>
   );
