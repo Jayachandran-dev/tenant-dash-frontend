@@ -12,6 +12,7 @@ import BusinessProfile from "./pages/BusinessProfile";
 import Settings from "./pages/Settings";
 import PageLoader from "./components/PageLoader";
 import Items from "./pages/Items";
+import AcceptInvite from "./pages/AcceptInvite";
 
 
 function AppRoutes() {
@@ -107,6 +108,8 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       />
+
+      <Route path="/invite/:token" element={<AcceptInvite />} />
     </Routes>
   );
 }
