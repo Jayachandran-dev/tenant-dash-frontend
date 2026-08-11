@@ -29,8 +29,7 @@ body {
 html,
 body,
 #root {
-  min-height: 100%;
-  overscroll-behavior-y: none;
+  min-height: 100%;         
 }
 
 @keyframes fadeIn {

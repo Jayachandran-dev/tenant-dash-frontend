@@ -18,7 +18,6 @@ import ConfirmDialog from "../components/ConfirmDialog";
 import usePermission from "../hooks/usePermission";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
-import usePullToRefresh from "../hooks/usePullToRefresh";
 
 const ROLE_COLORS = {
   owner: "primary",
@@ -57,10 +56,6 @@ export default function Users() {
   useEffect(() => {
     fetchUsers();
   }, [fetchUsers]);
-
-  const { pulling, refreshing } = usePullToRefresh(fetchUsers, {
-    enabled: true,
-  });
 
   const handleAddClick = () => {
     setFormMode("create");
@@ -184,14 +179,6 @@ export default function Users() {
 
   return (
     <>
-      {(pulling || refreshing) && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
-          <CircularProgress size={22} />
-          <Typography variant="caption" sx={{ ml: 1 }}>
-            {refreshing ? "Refreshing..." : "Release to refresh"}
-          </Typography>
-        </Box>
-      )}
 
       <CommonList
         title="Users"
@@ -199,7 +186,7 @@ export default function Users() {
         onAdd={canAddUser ? handleAddClick : undefined}
         columns={columns}
         rows={users}
-        loading={loading && !refreshing}
+        loading={loading}
         emptyMessage="No users found"
         getRowId={(row) => row.membershipId}
       />

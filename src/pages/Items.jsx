@@ -9,7 +9,6 @@ import ItemForm from "../components/ItemForm";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import { useCallback } from "react";
-import usePullToRefresh from "../hooks/usePullToRefresh";
 import ConfirmDialog from "../components/ConfirmDialog";
 
 export default function Items() {
@@ -44,9 +43,6 @@ export default function Items() {
     fetchItems();
   }, [currentTenant?.id, fetchItems]);
 
-  const { pulling, refreshing } = usePullToRefresh(fetchItems, {
-    enabled: true, // or only on mobile
-  });
 
   const handleAdd = () => {
     setFormMode("create");
@@ -136,14 +132,6 @@ export default function Items() {
 
   return (
     <>
-      {(pulling || refreshing) && (
-        <Box sx={{ display: "flex", justifyContent: "center", py: 1 }}>
-          <CircularProgress size={22} />
-          <Typography variant="caption" sx={{ ml: 1 }}>
-            {refreshing ? "Refreshing..." : "Release to refresh"}
-          </Typography>
-        </Box>
-      )}
 
       <CommonList
         title="Items"
@@ -151,7 +139,7 @@ export default function Items() {
         onAdd={handleAdd}
         columns={columns}
         rows={items}
-        loading={loading && !refreshing}
+        loading={loading}
         emptyTitle="No items yet"
         emptyMessage="Add your first item to get started."
         emptyIcon={<Inventory2OutlinedIcon />}
