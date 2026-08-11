@@ -10,6 +10,7 @@ import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
 import { useCallback } from "react";
 import ConfirmDialog from "../components/ConfirmDialog";
+import ItemListCard from "../components/ItemListCard";
 
 export default function Items() {
   const [items, setItems] = useState([]);
@@ -144,6 +145,9 @@ export default function Items() {
         emptyMessage="Add your first item to get started."
         emptyIcon={<Inventory2OutlinedIcon />}
         getRowId={(row) => row.id}
+        renderCard={(row) => (
+          <ItemListCard item={row} onEdit={handleEdit} onDelete={handleDeleteClick} />
+        )}
       />
 
       <ItemForm

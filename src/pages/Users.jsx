@@ -16,6 +16,7 @@ import api from "../api/axios";
 import CommonList from "../components/CommonList";
 import UserForm from "../components/UserForm";
 import ConfirmDialog from "../components/ConfirmDialog";
+import UserListCard from "../components/UserListCard";
 import usePermission from "../hooks/usePermission";
 import { useToast } from "../context/ToastContext";
 import { useAuth } from "../context/AuthContext";
@@ -208,6 +209,13 @@ export default function Users() {
         loading={loading}
         emptyMessage="No users found"
         getRowId={(row) => row.membershipId}
+        renderCard={(row) => (
+          <UserListCard
+            user={row}
+            isSelf={row.id === currentUser?.id}
+            onRemove={isOwner ? handleRemoveClick : undefined}
+          />
+        )}
       />
 
       <UserForm

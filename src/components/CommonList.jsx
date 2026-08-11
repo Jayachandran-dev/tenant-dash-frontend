@@ -40,6 +40,7 @@ export default function CommonList({
   emptyTitle = "Nothing here yet",
   emptyIcon,
   getRowId = (row) => row.id,
+  renderCard,
 }) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
@@ -106,29 +107,33 @@ export default function CommonList({
           />
         ) : (
           <Stack spacing={1.5}>
-            {rows.map((row) => (
-              <Card key={getRowId(row)} variant="outlined" sx={{ borderRadius: 1 }}>
-                <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
-                  {columns.map((col, index) => (
-                    <Box key={col.id} sx={{ mb: index === columns.length - 1 ? 0 : 1 }}>
-                      <Typography
-                        variant="caption"
-                        color="text.secondary"
-                        display="block"
-                      >
-                        {col.label}
-                      </Typography>
-                      <Typography variant="body2" fontWeight={index === 0 ? 600 : 400}>
-                        {col.render ? col.render(row) : row[col.id]}
-                      </Typography>
-                      {index < columns.length - 1 && (
-                        <Divider sx={{ mt: 1 }} />
-                      )}
-                    </Box>
-                  ))}
-                </CardContent>
-              </Card>
-            ))}
+            {rows.map((row) =>
+              renderCard ? (
+                <Box key={getRowId(row)}>{renderCard(row)}</Box>
+              ) : (
+                <Card key={getRowId(row)} variant="outlined" sx={{ borderRadius: 1 }}>
+                  <CardContent sx={{ py: 1.5, "&:last-child": { pb: 1.5 } }}>
+                    {columns.map((col, index) => (
+                      <Box key={col.id} sx={{ mb: index === columns.length - 1 ? 0 : 1 }}>
+                        <Typography
+                          variant="caption"
+                          color="text.secondary"
+                          display="block"
+                        >
+                          {col.label}
+                        </Typography>
+                        <Typography variant="body2" fontWeight={index === 0 ? 600 : 400}>
+                          {col.render ? col.render(row) : row[col.id]}
+                        </Typography>
+                        {index < columns.length - 1 && (
+                          <Divider sx={{ mt: 1 }} />
+                        )}
+                      </Box>
+                    ))}
+                  </CardContent>
+                </Card>
+              )
+            )}
           </Stack>
         )
       ) : (
