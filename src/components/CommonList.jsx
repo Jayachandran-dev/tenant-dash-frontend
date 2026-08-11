@@ -32,6 +32,7 @@ export default function CommonList({
   title,
   addButtonLabel = "Add",
   onAdd,
+  actions,
   columns = [],
   rows = [],
   loading = false,
@@ -43,37 +44,7 @@ export default function CommonList({
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("sm"));
 
-  if (loading) {
-    return (
-        <Box>
-          {/* keep sticky header if you want title visible while loading */}
-          <Box
-            sx={{
-              position: "sticky",
-              top: { xs: 56, sm: 64 },
-              zIndex: 10,
-              bgcolor: "background.default",
-              pb: 2,
-              pt: 1,
-            }}
-          >
-            <Stack direction="row" justifyContent="space-between" alignItems="center">
-              <Typography variant="h5" fontWeight={600}>
-                {title}
-              </Typography>
-              {onAdd && (
-                <Button variant="contained" onClick={onAdd} disabled>
-                  {addButtonLabel}
-                </Button>
-              )}
-            </Stack>
-          </Box>
-          <ListSkeleton rows={6} />
-        </Box>
-      );
-  }
-
-  const headerActions = onAdd && (
+  const addButton = onAdd ? (
     <Button
       variant="contained"
       onClick={onAdd}
@@ -82,7 +53,42 @@ export default function CommonList({
     >
       {addButtonLabel}
     </Button>
+  ) : null;
+
+  const headerActions = actions ? (
+    <Stack direction="row" spacing={1} alignItems="center">
+      {actions}
+      {addButton}
+    </Stack>
+  ) : (
+    addButton
   );
+
+  if (loading) {
+    return (
+      <Box>
+        {/* keep sticky header if you want title visible while loading */}
+        <Box
+          sx={{
+            position: "sticky",
+            top: { xs: 56, sm: 64 },
+            zIndex: 10,
+            bgcolor: "background.default",
+            pb: 2,
+            pt: 1,
+          }}
+        >
+          <Stack direction="row" justifyContent="space-between" alignItems="center">
+            <Typography variant="h5" fontWeight={600}>
+              {title}
+            </Typography>
+            {headerActions && <Box sx={{ display: "flex", gap: 1 }}>{headerActions}</Box>}
+          </Stack>
+        </Box>
+        <ListSkeleton rows={6} />
+      </Box>
+    );
+  }
 
   return (
     <Box>

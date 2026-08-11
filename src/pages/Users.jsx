@@ -9,6 +9,7 @@ import {
   IconButton,
   alpha,
   useTheme,
+  Button,
 } from "@mui/material";
 import DeleteIcon from "@mui/icons-material/Delete";
 import api from "../api/axios";
@@ -101,6 +102,17 @@ export default function Users() {
     }
   };
 
+  const handleInvite = async () => {
+    try {
+      const res = await api.post("/invites", { role: "employee" });
+      const link = `${window.location.origin}/invite/${res.data.token}`;
+      await navigator.clipboard.writeText(link);
+      showToast("Invite link copied to clipboard", "success");
+    } catch (err) {
+      showToast(err.response?.data?.message || "Failed to create invite", "error");
+    }
+  };
+
   const columns = [
     {
       id: "user",
@@ -184,6 +196,13 @@ export default function Users() {
         title="Users"
         addButtonLabel="Add User"
         onAdd={canAddUser ? handleAddClick : undefined}
+        actions={
+          canAddUser ? (
+            <Button variant="outlined" onClick={handleInvite}>
+              Invite
+            </Button>
+          ) : null
+        }
         columns={columns}
         rows={users}
         loading={loading}
